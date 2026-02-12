@@ -37,9 +37,13 @@
       --bannerNeutralBg1: rgba(255,255,255,.06);
       --bannerNeutralBg2: rgba(255,255,255,.02);
       --bannerNeutralBorder: rgba(255,255,255,.12);
+
+      --focus: rgba(110,168,255,.55);
+      --focusGlow: rgba(110,168,255,.18);
     }
 
     *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -51,6 +55,19 @@
       min-height:100vh;
       padding:12px;
     }
+
+    /* subtle “noise” overlay for premium feel */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.06;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
     .wrap{ max-width: 980px; margin: 0 auto; }
     header{
       display:flex; align-items:flex-start; justify-content:space-between;
@@ -63,6 +80,7 @@
       padding:8px 10px; border:1px solid var(--line);
       background: rgba(255,255,255,.04);
       border-radius:999px; color:var(--muted); font-size:12px; white-space:nowrap;
+      backdrop-filter: blur(8px);
     }
 
     /* Sticky remove summary banner */
@@ -70,14 +88,14 @@
       display:none;
       position: sticky;
       top: 10px;
-      z-index: 20;
+      z-index: 30;
       margin: 0 0 10px 0;
       padding: 10px 12px;
       border-radius: 14px;
       border: 1px solid var(--bannerNeutralBorder);
       background: linear-gradient(90deg, var(--bannerNeutralBg1), var(--bannerNeutralBg2));
-      box-shadow: 0 10px 24px rgba(0,0,0,.28);
-      backdrop-filter: blur(8px);
+      box-shadow: 0 12px 28px rgba(0,0,0,.30);
+      backdrop-filter: blur(12px);
     }
     .banner.ok{
       border-color: var(--bannerOkBorder);
@@ -132,9 +150,7 @@
       from { transform: translateY(-10px); opacity: 0; }
       to   { transform: translateY(0);     opacity: 1; }
     }
-    .banner.slide-in {
-      animation: bannerSlideIn 220ms ease-out;
-    }
+    .banner.slide-in { animation: bannerSlideIn 220ms ease-out; }
 
     /* Pulse on update */
     @keyframes pulseOk {
@@ -169,11 +185,14 @@
       overflow:hidden;
       background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
     }
+
+    /* Glassy toolbar for premium feel */
     .toolbar{
       display:flex; justify-content:space-between; align-items:center;
       padding:10px 12px;
       border-bottom:1px solid var(--line);
-      background: rgba(0,0,0,.12);
+      background: rgba(0,0,0,.10);
+      backdrop-filter: blur(12px);
       gap:10px; flex-wrap:wrap;
     }
     .leftTools{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
@@ -186,12 +205,19 @@
       border-radius: 12px;
       outline:none;
       font-size: 13px;
+      transition: box-shadow .15s ease, border-color .15s ease, transform .12s ease;
+    }
+    input[type="date"]:focus, .smallInput:focus{
+      border-color: var(--focus);
+      box-shadow: 0 0 0 4px var(--focusGlow);
+      transform: translateY(-1px);
     }
     .smallInput{
       width: 102px;
       text-align:right;
       font-weight:950;
     }
+
     button{
       border:1px solid var(--line);
       background: rgba(255,255,255,.06);
@@ -201,8 +227,9 @@
       cursor:pointer;
       font-weight:950;
       font-size: 13px;
-      transition: transform .05s ease, background .2s ease, border-color .2s ease;
+      transition: transform .06s ease, background .2s ease, border-color .2s ease, box-shadow .15s ease;
       display:inline-flex; align-items:center; gap:8px;
+      backdrop-filter: blur(8px);
     }
     button:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.18); }
     button:active{ transform: translateY(1px); }
@@ -230,7 +257,6 @@
     }
     tbody tr:hover{ background: rgba(255,255,255,.025); }
 
-    /* Highlight rows where something should be removed */
     tbody tr.to-remove.ok{
       background: linear-gradient(90deg, var(--rowGlow), var(--rowGlow2));
     }
@@ -238,7 +264,6 @@
       background: linear-gradient(90deg, rgba(250,204,21,.10), rgba(250,204,21,.06));
     }
 
-    /* If we can't hit exact float, highlight suggested rows in red */
     tbody tr.to-remove.bad{
       background: linear-gradient(90deg, var(--rowRed), var(--rowRed2));
     }
@@ -247,6 +272,7 @@
     }
 
     .denom{ font-weight:950; letter-spacing:-0.01em; }
+
     .countInput{
       width: 92px;
       font-size: 16px;
@@ -258,10 +284,13 @@
       color: var(--text);
       outline:none;
       text-align:right;
+      transition: box-shadow .15s ease, border-color .15s ease, transform .12s ease;
     }
+    /* Micro-interaction: lift on focus */
     .countInput:focus{
-      border-color: rgba(110,168,255,.55);
-      box-shadow: 0 0 0 4px rgba(110,168,255,.18);
+      border-color: var(--focus);
+      box-shadow: 0 0 0 4px var(--focusGlow);
+      transform: translateY(-1px);
     }
 
     .money{
@@ -319,6 +348,7 @@
       background: rgba(255,255,255,.04);
       border-radius: 14px;
       padding: 10px 10px;
+      backdrop-filter: blur(10px);
     }
     .floatTitle{
       display:flex; align-items:center; justify-content:space-between;
@@ -348,14 +378,93 @@
     .plan li{ margin:4px 0; }
     .mono{ font-variant-numeric: tabular-nums; }
 
+    /* Sticky mobile bottom bar */
+    .bottomBar{
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 40;
+      display: none;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      backdrop-filter: blur(14px);
+      padding: 10px 12px;
+    }
+    .bottomGrid{
+      display:grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap:10px;
+      align-items:center;
+    }
+    .bottomLeft .lbl{
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom:2px;
+    }
+    .bottomLeft .val{
+      font-weight: 950;
+      font-size: 18px;
+      letter-spacing:-0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .bottomRight{
+      text-align:right;
+    }
+    .bottomRight .pillStatus{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      font-weight: 950;
+      font-size: 12px;
+      white-space:nowrap;
+    }
+    .pillStatus.ok{
+      border-color: rgba(250,204,21,.45);
+      background: rgba(250,204,21,.16);
+      color: #fff7cc;
+    }
+    .pillStatus.bad{
+      border-color: rgba(251,113,133,.45);
+      background: rgba(251,113,133,.16);
+      color: #ffe1e8;
+    }
+    .bottomRight .subline{
+      margin-top:6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+    }
+
     /* Phone friendliness */
+    @media (max-width:680px){
+      body{ padding-bottom: 96px; } /* room for bottom bar */
+      .bottomBar{ display:block; }
+    }
     @media (max-width:520px){
-      body{ padding:10px; }
+      body{ padding:10px; padding-bottom: 100px; }
       thead th{ padding:9px 8px; font-size:10px; }
       tbody td{ padding:7px 8px; }
       .countInput{ width: 84px; padding:9px 9px; }
       .smallInput{ width: 92px; }
       .banner{ top: 8px; }
+      .bottomBar{ left: 10px; right: 10px; bottom: 10px; }
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      *{ animation: none !important; transition: none !important; }
     }
   </style>
 </head>
@@ -401,7 +510,6 @@
         </div>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button id="fillZero" type="button">↺ Set blanks to 0</button>
           <button class="danger" id="clearAll" type="button">🗑️ Clear all</button>
         </div>
       </div>
@@ -457,6 +565,20 @@
     </section>
   </div>
 
+  <!-- Mobile sticky bottom bar -->
+  <div class="bottomBar" id="bottomBar" aria-live="polite">
+    <div class="bottomGrid">
+      <div class="bottomLeft">
+        <div class="lbl">Total</div>
+        <div class="val" id="bbTotal">$0.00</div>
+      </div>
+      <div class="bottomRight">
+        <div class="pillStatus ok" id="bbStatus">OK</div>
+        <div class="subline" id="bbBanking">Banking: $0.00</div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const DENOMS = [
       { label: "$100", cents: 10000 },
@@ -487,6 +609,11 @@
     const removeBannerAmtEl = document.getElementById("removeBannerAmt");
     const removeBannerHintEl = document.getElementById("removeBannerHint");
 
+    // Bottom bar
+    const bbTotalEl = document.getElementById("bbTotal");
+    const bbStatusEl = document.getElementById("bbStatus");
+    const bbBankingEl = document.getElementById("bbBanking");
+
     const fmtNZD = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
     const moneyFromCents = (c) => fmtNZD.format((c || 0) / 100);
 
@@ -496,6 +623,9 @@
     // Avoid spamming haptics/animations on every keystroke if the plan didn't change
     let lastPlanSignature = "";
 
+    // For animated number transitions
+    const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     // New session each time: no storage. Date defaults to today.
     const today = new Date();
     cashDateEl.value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
@@ -504,6 +634,42 @@
       if (!("vibrate" in navigator)) return;
       const pattern = (mode === "bad") ? [18, 25, 18] : [10];
       try { navigator.vibrate(pattern); } catch {}
+    }
+
+    function formatCentsCompact(cents){
+      return moneyFromCents(cents);
+    }
+
+    function parseMoneyTextToCents(text){
+      // expects $1,234.56 (NZD) – used for animated transitions fallback
+      const cleaned = String(text).replace(/[^0-9.-]/g, "");
+      const val = Number(cleaned || 0);
+      return Math.round(val * 100);
+    }
+
+    function animateMoneyEl(el, fromCents, toCents, durationMs = 140){
+      if (prefersReducedMotion) {
+        el.textContent = moneyFromCents(toCents);
+        return;
+      }
+      const start = performance.now();
+      const delta = toCents - fromCents;
+
+      const step = (t) => {
+        const p = Math.min(1, (t - start) / durationMs);
+        // easeOutCubic
+        const eased = 1 - Math.pow(1 - p, 3);
+        const current = Math.round(fromCents + delta * eased);
+        el.textContent = moneyFromCents(current);
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
+    function setMoneyAnimated(el, toCents){
+      const fromCents = parseMoneyTextToCents(el.textContent);
+      if (fromCents === toCents) return;
+      animateMoneyEl(el, fromCents, toCents);
     }
 
     function buildRows(){
@@ -638,7 +804,7 @@
 
     function animateBanner(mode){
       removeBannerEl.classList.remove("animate-ok","animate-bad");
-      void removeBannerEl.offsetWidth; // restart
+      void removeBannerEl.offsetWidth;
       if (mode === "ok") removeBannerEl.classList.add("animate-ok");
       if (mode === "bad") removeBannerEl.classList.add("animate-bad");
     }
@@ -663,6 +829,7 @@
           removedCents:0,
           remainingCents: totalCents,
           leftoverNeed: -needToRemove,
+          mode: "bad",
           planSig: `short:${-needToRemove}`
         };
       }
@@ -675,6 +842,7 @@
           removedCents:0,
           remainingCents: totalCents,
           leftoverNeed: 0,
+          mode: "ok",
           planSig: `none`
         };
       }
@@ -707,8 +875,6 @@
 
       const bannerParts = plan.map(p => `${p.count}×${p.label}`);
       const bannerText = bannerParts.length ? bannerParts.join(" · ") : "—";
-
-      // signature to detect change
       const planSig = `${mode}|need:${needToRemove}|removed:${removedCents}|left:${remainingToRemove}|${bannerText}`;
 
       // Populate remove columns ONLY for >0, highlight row
@@ -723,7 +889,6 @@
 
         if (rowEl){
           rowEl.classList.add("to-remove", mode);
-          // Flash rows only if plan changed (handled in recalc using planSig)
         }
       });
 
@@ -735,6 +900,7 @@
           removedCents:0,
           remainingCents: totalCents,
           leftoverNeed: needToRemove,
+          mode: "bad",
           planSig: `norem:${needToRemove}`
         };
       }
@@ -777,11 +943,32 @@
       };
     }
 
+    function updateBottomBar(totalCents, targetCents, mode){
+      // total
+      setMoneyAnimated(bbTotalEl, totalCents);
+
+      // banking = total - target (can be negative)
+      const bankingCents = totalCents - targetCents;
+      const bankingText = `Banking: ${moneyFromCents(bankingCents)}`;
+      bbBankingEl.textContent = bankingText;
+
+      bbStatusEl.classList.remove("ok","bad");
+      if (mode === "ok") {
+        bbStatusEl.classList.add("ok");
+        bbStatusEl.textContent = "OK";
+      } else {
+        bbStatusEl.classList.add("bad");
+        bbStatusEl.textContent = "Issue";
+      }
+    }
+
     function recalc(){
       const counts = getCounts();
       const { totalCents, items } = computeTotals(counts);
 
-      grandTotalEl.textContent = moneyFromCents(totalCents);
+      // Animated grand total + remaining
+      setMoneyAnimated(grandTotalEl, totalCents);
+
       itemsSummaryEl.textContent =
         items === 0 ? "0 items entered"
         : items === 1 ? "1 item entered"
@@ -793,6 +980,12 @@
 
       const plan = computeRemovalPlan(counts, totalCents, targetCents);
 
+      // animated remaining badge
+      setMoneyAnimated(remainingBadgeEl, plan.remainingCents);
+
+      // bottom bar
+      updateBottomBar(totalCents, targetCents, plan.mode || (plan.ok ? "ok" : "bad"));
+
       removePlanEl.innerHTML = "";
       if (plan.plan.length > 0) {
         plan.plan.forEach(p => {
@@ -803,17 +996,16 @@
         });
       }
 
-      remainingBadgeEl.textContent = moneyFromCents(plan.remainingCents);
-
       if (items === 0) {
         floatStatusEl.className = "status";
         floatStatusEl.textContent = "—";
         removeSummaryEl.textContent = "Enter counts to see what to remove.";
         removePlanEl.innerHTML = "";
-        remainingBadgeEl.textContent = moneyFromCents(0);
+        setMoneyAnimated(remainingBadgeEl, 0);
         clearRemoveColumnsAndHighlights();
         hideBanner();
         lastPlanSignature = "";
+        updateBottomBar(0, targetCents, "ok");
         return;
       }
 
@@ -821,17 +1013,15 @@
       floatStatusEl.textContent = plan.ok ? "OK" : "Issue";
       removeSummaryEl.textContent = plan.message;
 
-      // Animate + haptic only when the plan meaningfully changes
+      // Animate + haptic only when plan changes
       if (plan.planSig && plan.planSig !== lastPlanSignature) {
         lastPlanSignature = plan.planSig;
 
-        // Banner pulse (only if visible)
         if (removeBannerEl.style.display !== "none" && (plan.mode === "ok" || plan.mode === "bad")) {
           animateBanner(plan.mode);
           haptic(plan.mode);
         }
 
-        // Flash each highlighted row
         DENOMS.forEach((_, idx) => {
           const rowEl = document.getElementById(`row-${idx}`);
           if (!rowEl) return;
@@ -845,11 +1035,8 @@
     document.getElementById("clearAll").addEventListener("click", () => {
       document.querySelectorAll(".countInput").forEach(i => i.value = "");
       recalc();
-    });
-
-    document.getElementById("fillZero").addEventListener("click", () => {
-      document.querySelectorAll(".countInput").forEach(i => { if (i.value === "") i.value = "0"; });
-      recalc();
+      // Small haptic to confirm clear (if supported)
+      haptic("ok");
     });
 
     floatTargetEl.addEventListener("input", () => {
