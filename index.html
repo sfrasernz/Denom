@@ -12,13 +12,33 @@
       --line:rgba(255,255,255,.10);
       --shadow: 0 14px 40px rgba(0,0,0,.35);
       --radius: 16px;
+
       --ok:#34d399;
       --warn:#fb7185;
+
       --yellow: rgba(250, 204, 21, .24);
       --yellowBorder: rgba(250, 204, 21, .55);
       --rowGlow: rgba(250, 204, 21, .08);
       --rowGlow2: rgba(250, 204, 21, .04);
+
+      --red: rgba(251, 113, 133, .18);
+      --redBorder: rgba(251, 113, 133, .45);
+      --rowRed: rgba(251, 113, 133, .09);
+      --rowRed2: rgba(251, 113, 133, .05);
+
+      --bannerOkBg1: rgba(250,204,21,.16);
+      --bannerOkBg2: rgba(255,255,255,.03);
+      --bannerOkBorder: rgba(250,204,21,.35);
+
+      --bannerBadBg1: rgba(251,113,133,.16);
+      --bannerBadBg2: rgba(255,255,255,.03);
+      --bannerBadBorder: rgba(251,113,133,.35);
+
+      --bannerNeutralBg1: rgba(255,255,255,.06);
+      --bannerNeutralBg2: rgba(255,255,255,.02);
+      --bannerNeutralBorder: rgba(255,255,255,.12);
     }
+
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -29,14 +49,14 @@
         var(--bg);
       color:var(--text);
       min-height:100vh;
-      padding:16px;
+      padding:12px;
     }
     .wrap{ max-width: 980px; margin: 0 auto; }
     header{
       display:flex; align-items:flex-start; justify-content:space-between;
-      gap:12px; margin-bottom:12px;
+      gap:12px; margin-bottom:10px;
     }
-    h1{ margin:0; font-size: clamp(20px, 2.2vw, 28px); letter-spacing:-0.02em; }
+    h1{ margin:0; font-size: clamp(18px, 2.2vw, 26px); letter-spacing:-0.02em; }
     .sub{ margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.35; }
     .chip{
       display:inline-flex; align-items:center; gap:8px;
@@ -45,15 +65,27 @@
       border-radius:999px; color:var(--muted); font-size:12px; white-space:nowrap;
     }
 
-    /* Remove summary banner */
+    /* Sticky remove summary banner */
     .banner{
       display:none;
-      margin: 0 0 12px 0;
+      position: sticky;
+      top: 10px;
+      z-index: 20;
+      margin: 0 0 10px 0;
       padding: 10px 12px;
       border-radius: 14px;
-      border: 1px solid rgba(250,204,21,.35);
-      background: linear-gradient(90deg, rgba(250,204,21,.14), rgba(255,255,255,.03));
-      box-shadow: 0 10px 24px rgba(0,0,0,.22);
+      border: 1px solid var(--bannerNeutralBorder);
+      background: linear-gradient(90deg, var(--bannerNeutralBg1), var(--bannerNeutralBg2));
+      box-shadow: 0 10px 24px rgba(0,0,0,.28);
+      backdrop-filter: blur(8px);
+    }
+    .banner.ok{
+      border-color: var(--bannerOkBorder);
+      background: linear-gradient(90deg, var(--bannerOkBg1), var(--bannerOkBg2));
+    }
+    .banner.bad{
+      border-color: var(--bannerBadBorder);
+      background: linear-gradient(90deg, var(--bannerBadBg1), var(--bannerBadBg2));
     }
     .bannerRow{
       display:flex;
@@ -62,30 +94,36 @@
       gap:10px;
       flex-wrap:wrap;
     }
-    .banner strong{
-      font-size: 13px;
-      letter-spacing: -0.01em;
-    }
+    .banner strong{ font-size: 13px; letter-spacing: -0.01em; }
     .bannerText{
       color: var(--text);
-      font-weight: 900;
+      font-weight: 950;
       font-variant-numeric: tabular-nums;
       line-height:1.35;
     }
     .bannerAmt{
-      color: #fff7cc;
       font-weight: 950;
       font-variant-numeric: tabular-nums;
       white-space:nowrap;
       padding:6px 10px;
       border-radius:999px;
-      border:1px solid rgba(250,204,21,.45);
+      border:1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,.06);
+    }
+    .banner.ok .bannerAmt{
+      border-color: rgba(250,204,21,.45);
       background: rgba(250,204,21,.18);
+      color: #fff7cc;
+    }
+    .banner.bad .bannerAmt{
+      border-color: rgba(251,113,133,.45);
+      background: rgba(251,113,133,.16);
+      color: #ffe1e8;
     }
     .bannerHint{
       color: var(--muted);
       font-size:12px;
-      font-weight:800;
+      font-weight:850;
       margin-top:6px;
     }
 
@@ -115,7 +153,7 @@
       font-size: 13px;
     }
     .smallInput{
-      width: 110px;
+      width: 102px;
       text-align:right;
       font-weight:950;
     }
@@ -145,43 +183,40 @@
       letter-spacing:.08em;
       text-transform:uppercase;
       color: var(--muted);
-      padding:10px 12px;
+      padding:10px 10px;
       background: rgba(255,255,255,.03);
       border-bottom:1px solid var(--line);
       white-space:nowrap;
     }
     tbody td{
-      padding: 8px 12px;
+      padding: 8px 10px;
       border-bottom:1px solid var(--line);
       vertical-align:middle;
     }
     tbody tr:hover{ background: rgba(255,255,255,.025); }
 
-    tbody tr.to-remove{
+    /* Highlight rows where something should be removed */
+    tbody tr.to-remove.ok{
       background: linear-gradient(90deg, var(--rowGlow), var(--rowGlow2));
     }
-    tbody tr.to-remove:hover{
+    tbody tr.to-remove.ok:hover{
       background: linear-gradient(90deg, rgba(250,204,21,.10), rgba(250,204,21,.06));
     }
 
-    .denom{ font-weight:950; letter-spacing:-0.01em; }
-    .kind{
-      display:inline-block;
-      margin-left:8px;
-      font-size:11px;
-      color: var(--muted);
-      font-weight:950;
-      padding:3px 7px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
+    /* If we can't hit exact float, highlight suggested rows in red */
+    tbody tr.to-remove.bad{
+      background: linear-gradient(90deg, var(--rowRed), var(--rowRed2));
+    }
+    tbody tr.to-remove.bad:hover{
+      background: linear-gradient(90deg, rgba(251,113,133,.12), rgba(251,113,133,.07));
     }
 
+    .denom{ font-weight:950; letter-spacing:-0.01em; }
     .countInput{
-      width: 110px;
+      width: 92px;
       font-size: 16px;
       font-weight:950;
-      padding: 10px 12px;
+      padding: 10px 10px;
       border-radius: 14px;
       border: 1px solid var(--line);
       background: rgba(255,255,255,.06);
@@ -209,17 +244,22 @@
     }
     .pill{
       display:inline-block;
-      min-width: 54px;
+      min-width: 44px;
       text-align:right;
-      padding:6px 10px;
+      padding:6px 9px;
       border-radius: 999px;
       background: var(--yellow);
       border: 1px solid var(--yellowBorder);
       color: #fff7cc;
     }
+    .pill.bad{
+      background: var(--red);
+      border-color: var(--redBorder);
+      color: #ffe1e8;
+    }
 
     tfoot td{
-      padding: 10px 12px;
+      padding: 10px 10px;
       background: rgba(52,211,153,.08);
       border-top: 1px solid rgba(52,211,153,.25);
       font-weight:950;
@@ -273,10 +313,14 @@
     .plan li{ margin:4px 0; }
     .mono{ font-variant-numeric: tabular-nums; }
 
-    @media (max-width:760px){
-      .countInput{ width: 100px; }
-      tbody td, thead th, tfoot td{ padding-left:10px; padding-right:10px; }
-      .floatCard{ grid-template-columns: 1fr; }
+    /* Phone friendliness */
+    @media (max-width:520px){
+      body{ padding:10px; }
+      thead th{ padding:9px 8px; font-size:10px; }
+      tbody td{ padding:7px 8px; }
+      .countInput{ width: 84px; padding:9px 9px; }
+      .smallInput{ width: 92px; }
+      .banner{ top: 8px; }
     }
   </style>
 </head>
@@ -294,7 +338,7 @@
       <div class="chip">🧼 No saved sessions</div>
     </header>
 
-    <!-- Remove Summary Banner -->
+    <!-- Sticky Remove Summary Banner -->
     <div class="banner" id="removeBanner" role="status" aria-live="polite">
       <div class="bannerRow">
         <div class="bannerText">
@@ -309,16 +353,16 @@
       <div class="toolbar">
         <div class="leftTools">
           <div class="field">
-            <span>Cash-up date</span>
+            <span>Date</span>
             <input id="cashDate" type="date" />
           </div>
 
           <div class="field">
-            <span>Float target</span>
+            <span>Float</span>
             <input id="floatTarget" class="smallInput" type="number" min="0" step="1" value="200" inputmode="numeric" />
           </div>
 
-          <div class="hint">Removes biggest denominations first</div>
+          <div class="hint">Biggest denominations first</div>
         </div>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -327,15 +371,15 @@
         </div>
       </div>
 
-      <div style="overflow:auto;">
+      <div>
         <table aria-label="Cash calculator table">
           <thead>
             <tr>
-              <th style="min-width:180px;">Denomination</th>
-              <th style="width:160px;">Count</th>
-              <th style="width:170px; text-align:right;">Line total</th>
-              <th style="width:130px; text-align:right;">Remove qty</th>
-              <th style="width:150px; text-align:right;">Remove $</th>
+              <th style="min-width:92px;">Denom</th>
+              <th style="width:110px;">Count</th>
+              <th style="width:120px; text-align:right;">Total</th>
+              <th style="width:90px; text-align:right;">Remove</th>
+              <th style="width:110px; text-align:right;">Remove $</th>
             </tr>
           </thead>
           <tbody id="rows"></tbody>
@@ -358,7 +402,7 @@
       <div class="floatCard">
         <div class="floatBox">
           <div class="floatTitle">
-            <strong>Float plan (leave exactly <span class="mono" id="targetText">$200.00</span> in till)</strong>
+            <strong>Float plan (leave <span class="mono" id="targetText">$200.00</span>)</strong>
             <span id="floatStatus" class="status">—</span>
           </div>
           <div class="hint" id="removeSummary">Enter counts to see what to remove.</div>
@@ -367,11 +411,11 @@
 
         <div class="floatBox">
           <div class="floatTitle">
-            <strong>Remaining in till after removal</strong>
+            <strong>Remaining after removal</strong>
             <span class="status ok" id="remainingBadge">$0.00</span>
           </div>
           <div class="hint">
-            If it can’t hit the target exactly with your mix, it will show what you’re short by.
+            If it can’t hit the float exactly, rows + banner turn red.
           </div>
         </div>
       </div>
@@ -380,16 +424,16 @@
 
   <script>
     const DENOMS = [
-      { label: "$100", cents: 10000, kind: "Note" },
-      { label: "$50",  cents:  5000, kind: "Note" },
-      { label: "$20",  cents:  2000, kind: "Note" },
-      { label: "$10",  cents:  1000, kind: "Note" },
-      { label: "$5",   cents:   500, kind: "Note" },
-      { label: "$2",   cents:   200, kind: "Coin" },
-      { label: "$1",   cents:   100, kind: "Coin" },
-      { label: "50c",  cents:    50, kind: "Coin" },
-      { label: "20c",  cents:    20, kind: "Coin" },
-      { label: "10c",  cents:    10, kind: "Coin" },
+      { label: "$100", cents: 10000 },
+      { label: "$50",  cents:  5000 },
+      { label: "$20",  cents:  2000 },
+      { label: "$10",  cents:  1000 },
+      { label: "$5",   cents:   500 },
+      { label: "$2",   cents:   200 },
+      { label: "$1",   cents:   100 },
+      { label: "50c",  cents:    50 },
+      { label: "20c",  cents:    20 },
+      { label: "10c",  cents:    10 },
     ];
 
     const rowsEl = document.getElementById("rows");
@@ -422,7 +466,7 @@
         tr.id = `row-${idx}`;
 
         const tdDenom = document.createElement("td");
-        tdDenom.innerHTML = `<span class="denom">${d.label}</span><span class="kind">${d.kind}</span>`;
+        tdDenom.innerHTML = `<span class="denom">${d.label}</span>`;
 
         const tdCount = document.createElement("td");
         const input = document.createElement("input");
@@ -435,8 +479,10 @@
         input.autocomplete = "off";
         input.setAttribute("aria-label", `Count for ${d.label}`);
 
+        // Stop mouse wheel changing values accidentally
         input.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
 
+        // Enter = next field, Shift+Enter = previous field
         input.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
             e.preventDefault();
@@ -465,12 +511,12 @@
         const tdRemoveQty = document.createElement("td");
         tdRemoveQty.className = "removeQty";
         tdRemoveQty.id = `removeQty-${idx}`;
-        tdRemoveQty.innerHTML = "";
+        tdRemoveQty.innerHTML = ""; // hidden when zero
 
         const tdRemoveAmt = document.createElement("td");
         tdRemoveAmt.className = "money";
         tdRemoveAmt.id = `removeAmt-${idx}`;
-        tdRemoveAmt.textContent = "";
+        tdRemoveAmt.textContent = ""; // hidden when zero
 
         tr.appendChild(tdDenom);
         tr.appendChild(tdCount);
@@ -512,19 +558,25 @@
         const r = document.getElementById(`row-${idx}`);
         if (q) q.innerHTML = "";
         if (a) a.textContent = "";
-        if (r) r.classList.remove("to-remove");
+        if (r) {
+          r.classList.remove("to-remove","ok","bad");
+        }
       });
     }
 
     function hideBanner(){
       removeBannerEl.style.display = "none";
+      removeBannerEl.classList.remove("ok","bad");
       removeBannerTextEl.textContent = "—";
       removeBannerAmtEl.textContent = moneyFromCents(0);
       removeBannerHintEl.textContent = "Use the highlighted rows below as your pick list.";
     }
 
-    function showBanner(text, amtCents, hint){
+    function showBanner({ text, amtCents, mode, hint }){
       removeBannerEl.style.display = "block";
+      removeBannerEl.classList.remove("ok","bad");
+      if (mode === "ok") removeBannerEl.classList.add("ok");
+      if (mode === "bad") removeBannerEl.classList.add("bad");
       removeBannerTextEl.textContent = text;
       removeBannerAmtEl.textContent = moneyFromCents(amtCents);
       removeBannerHintEl.textContent = hint || "Use the highlighted rows below as your pick list.";
@@ -537,11 +589,27 @@
       const needToRemove = totalCents - targetCents;
 
       if (needToRemove < 0) {
-        return { ok:false, message:`You’re short by ${moneyFromCents(-needToRemove)} to reach the target float.`, plan:[], removedCents:0, remainingCents: totalCents, leftoverNeed: -needToRemove };
+        // No removal (short)
+        return {
+          ok:false,
+          message:`You’re short by ${moneyFromCents(-needToRemove)} to reach the target float.`,
+          plan:[],
+          removedCents:0,
+          remainingCents: totalCents,
+          leftoverNeed: -needToRemove
+        };
       }
 
       if (needToRemove === 0) {
-        return { ok:true, message:`No removal needed — you’re already at the target.`, plan:[], removedCents:0, remainingCents: totalCents, leftoverNeed: 0 };
+        // Perfect already
+        return {
+          ok:true,
+          message:`No removal needed — you’re already at the target.`,
+          plan:[],
+          removedCents:0,
+          remainingCents: totalCents,
+          leftoverNeed: 0
+        };
       }
 
       let remainingToRemove = needToRemove;
@@ -567,6 +635,9 @@
       const removedCents = needToRemove - remainingToRemove;
       const remainingCents = totalCents - removedCents;
 
+      const isExact = (remainingToRemove === 0);
+      const mode = isExact ? "ok" : "bad";
+
       // Populate remove columns ONLY for >0, highlight row
       plan.forEach(p => {
         const qtyEl = document.getElementById(`removeQty-${p.idx}`);
@@ -574,24 +645,40 @@
         const rowEl = document.getElementById(`row-${p.idx}`);
         const lineCents = p.count * p.centsEach;
 
-        if (qtyEl) qtyEl.innerHTML = `<span class="pill">${p.count}</span>`;
+        if (qtyEl) qtyEl.innerHTML = `<span class="pill ${isExact ? "" : "bad"}">${p.count}</span>`;
         if (amtEl) amtEl.textContent = moneyFromCents(lineCents);
-        if (rowEl) rowEl.classList.add("to-remove");
+
+        if (rowEl){
+          rowEl.classList.add("to-remove", mode);
+        }
       });
 
       // Banner text like: 1×$100 · 1×$50 · 2×$20
       const bannerParts = plan.map(p => `${p.count}×${p.label}`);
       const bannerText = bannerParts.length ? bannerParts.join(" · ") : "—";
 
-      if (remainingToRemove !== 0) {
-        showBanner(
-          bannerText,
-          removedCents,
-          `Can’t hit target exactly — still need ${moneyFromCents(remainingToRemove)} more (missing denominations).`
-        );
+      if (!bannerParts.length){
+        // Nothing removable despite needing removal (rare if target > total? but handled above)
         return {
           ok:false,
-          message:`Can’t make the target exactly with your mix. You can remove ${moneyFromCents(removedCents)}, but you still need ${moneyFromCents(remainingToRemove)} more (missing exact denominations).`,
+          message:`No removable denominations available.`,
+          plan:[],
+          removedCents:0,
+          remainingCents: totalCents,
+          leftoverNeed: needToRemove
+        };
+      }
+
+      if (!isExact) {
+        showBanner({
+          text: bannerText,
+          amtCents: removedCents,
+          mode: "bad",
+          hint: `Issue: still need ${moneyFromCents(remainingToRemove)} more to reach exact float.`
+        });
+        return {
+          ok:false,
+          message:`Can’t make the float exactly with your mix. Remove ${moneyFromCents(removedCents)} now, but you still need ${moneyFromCents(remainingToRemove)} more (missing denominations).`,
           plan,
           removedCents,
           remainingCents,
@@ -599,7 +686,13 @@
         };
       }
 
-      showBanner(bannerText, needToRemove, "Use the highlighted rows below as your pick list.");
+      showBanner({
+        text: bannerText,
+        amtCents: needToRemove,
+        mode: "ok",
+        hint: "All good — remove the highlighted denominations."
+      });
+
       return {
         ok:true,
         message:`Remove ${moneyFromCents(needToRemove)} to leave exactly ${moneyFromCents(targetCents)}.`,
@@ -650,7 +743,7 @@
       }
 
       floatStatusEl.className = "status " + (plan.ok ? "ok" : "warn");
-      floatStatusEl.textContent = plan.ok ? "OK" : "Needs attention";
+      floatStatusEl.textContent = plan.ok ? "OK" : "Issue";
       removeSummaryEl.textContent = plan.message;
     }
 
