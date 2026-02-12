@@ -14,8 +14,8 @@
       --radius: 16px;
       --ok:#34d399;
       --warn:#fb7185;
-      --yellow: rgba(250, 204, 21, .22);
-      --yellowBorder: rgba(250, 204, 21, .45);
+      --yellow: rgba(250, 204, 21, .24);
+      --yellowBorder: rgba(250, 204, 21, .55);
     }
     *{box-sizing:border-box}
     body{
@@ -70,7 +70,7 @@
     .smallInput{
       width: 110px;
       text-align:right;
-      font-weight:800;
+      font-weight:900;
     }
     button{
       border:1px solid var(--line);
@@ -79,7 +79,7 @@
       padding:8px 10px;
       border-radius: 12px;
       cursor:pointer;
-      font-weight:800;
+      font-weight:900;
       font-size: 13px;
       transition: transform .05s ease, background .2s ease, border-color .2s ease;
       display:inline-flex; align-items:center; gap:8px;
@@ -110,13 +110,13 @@
     }
     tbody tr:hover{ background: rgba(255,255,255,.025); }
 
-    .denom{ font-weight:900; letter-spacing:-0.01em; }
+    .denom{ font-weight:950; letter-spacing:-0.01em; }
     .kind{
       display:inline-block;
       margin-left:8px;
       font-size:11px;
       color: var(--muted);
-      font-weight:800;
+      font-weight:900;
       padding:3px 7px;
       border-radius:999px;
       border:1px solid var(--line);
@@ -126,7 +126,7 @@
     .countInput{
       width: 110px;
       font-size: 16px;
-      font-weight:900;
+      font-weight:950;
       padding: 10px 12px;
       border-radius: 14px;
       border: 1px solid var(--line);
@@ -143,17 +143,17 @@
     .money{
       text-align:right;
       font-variant-numeric: tabular-nums;
-      font-weight:900;
+      font-weight:950;
       white-space:nowrap;
     }
 
     .removeQty{
       text-align:right;
       font-variant-numeric: tabular-nums;
-      font-weight:900;
+      font-weight:950;
       white-space:nowrap;
     }
-    .removeQty .pill{
+    .pill{
       display:inline-block;
       min-width: 54px;
       text-align:right;
@@ -175,7 +175,7 @@
       gap:12px; flex-wrap:wrap;
     }
     .grand{ font-size: clamp(18px, 2vw, 24px); letter-spacing:-0.02em; }
-    .hint{ color: var(--muted); font-weight:800; font-size: 12px; }
+    .hint{ color: var(--muted); font-weight:900; font-size: 12px; }
 
     .floatCard{
       padding: 12px;
@@ -199,7 +199,7 @@
     .floatTitle strong{ font-size:13px; }
     .status{
       font-size:12px;
-      font-weight:900;
+      font-weight:950;
       padding:6px 8px;
       border-radius:999px;
       border:1px solid var(--line);
@@ -253,7 +253,7 @@
             <input id="floatTarget" class="smallInput" type="number" min="0" step="1" value="200" inputmode="numeric" />
           </div>
 
-          <div class="hint">Removal plan removes biggest denominations first</div>
+          <div class="hint">Removes biggest denominations first</div>
         </div>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -314,7 +314,6 @@
   </div>
 
   <script>
-    // NZ denominations (in cents). Sorted largest -> smallest (for "remove biggest first").
     const DENOMS = [
       { label: "$100", cents: 10000, kind: "Note" },
       { label: "$50",  cents:  5000, kind: "Note" },
@@ -348,7 +347,6 @@
 
     function buildRows(){
       rowsEl.innerHTML = "";
-
       DENOMS.forEach((d, idx) => {
         const tr = document.createElement("tr");
 
@@ -366,10 +364,8 @@
         input.autocomplete = "off";
         input.setAttribute("aria-label", `Count for ${d.label}`);
 
-        // Stop mouse wheel changing values accidentally
         input.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
 
-        // Enter = next field, Shift+Enter = previous field
         input.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
             e.preventDefault();
@@ -383,7 +379,6 @@
         });
 
         input.addEventListener("input", () => {
-          // force integer >= 0 (or blank)
           const v = input.value === "" ? "" : Math.max(0, Math.floor(Number(input.value) || 0));
           input.value = v === "" ? "" : String(v);
           recalc();
@@ -399,12 +394,12 @@
         const tdRemoveQty = document.createElement("td");
         tdRemoveQty.className = "removeQty";
         tdRemoveQty.id = `removeQty-${idx}`;
-        tdRemoveQty.innerHTML = `<span class="pill">0</span>`;
+        tdRemoveQty.innerHTML = ""; // hidden when zero
 
         const tdRemoveAmt = document.createElement("td");
         tdRemoveAmt.className = "money";
         tdRemoveAmt.id = `removeAmt-${idx}`;
-        tdRemoveAmt.textContent = moneyFromCents(0);
+        tdRemoveAmt.textContent = ""; // hidden when zero
 
         tr.appendChild(tdDenom);
         tr.appendChild(tdCount);
@@ -443,12 +438,11 @@
       DENOMS.forEach((_, idx) => {
         const q = document.getElementById(`removeQty-${idx}`);
         const a = document.getElementById(`removeAmt-${idx}`);
-        if (q) q.innerHTML = `<span class="pill">0</span>`;
-        if (a) a.textContent = moneyFromCents(0);
+        if (q) q.innerHTML = "";       // hide zeros
+        if (a) a.textContent = "";     // hide zeros
       });
     }
 
-    // Greedy removal: largest denom first, limited by available counts.
     function computeRemovalPlan(counts, totalCents, targetCents){
       clearRemoveColumns();
 
@@ -479,6 +473,7 @@
       let remainingToRemove = needToRemove;
       const plan = [];
 
+      // Greedy: biggest denominations first, limited by available counts.
       for (let i = 0; i < DENOMS.length; i++){
         const denom = DENOMS[i];
         const available = counts[i] || 0;
@@ -498,7 +493,7 @@
       const removedCents = needToRemove - remainingToRemove;
       const remainingCents = totalCents - removedCents;
 
-      // Populate remove columns
+      // Populate remove columns ONLY for > 0
       plan.forEach(p => {
         const qtyEl = document.getElementById(`removeQty-${p.idx}`);
         const amtEl = document.getElementById(`removeAmt-${p.idx}`);
@@ -569,27 +564,4 @@
 
       floatStatusEl.className = "status " + (plan.ok ? "ok" : "warn");
       floatStatusEl.textContent = plan.ok ? "OK" : "Needs attention";
-      removeSummaryEl.textContent = plan.message;
-    }
-
-    document.getElementById("clearAll").addEventListener("click", () => {
-      document.querySelectorAll(".countInput").forEach(i => i.value = "");
-      recalc();
-    });
-
-    document.getElementById("fillZero").addEventListener("click", () => {
-      document.querySelectorAll(".countInput").forEach(i => { if (i.value === "") i.value = "0"; });
-      recalc();
-    });
-
-    floatTargetEl.addEventListener("input", () => {
-      const v = Math.max(0, Math.floor(Number(floatTargetEl.value || 0)));
-      floatTargetEl.value = String(v);
-      recalc();
-    });
-
-    buildRows();
-    recalc();
-  </script>
-</body>
-</html>
+      removeSummaryEl.textContent = plan.mes
