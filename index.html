@@ -8,175 +8,127 @@
     :root{
       --bg:#0b1220;
       --card:#0f1a2e;
-      --card2:#0c172a;
       --text:#eaf0ff;
       --muted:#9fb0d1;
       --line:rgba(255,255,255,.10);
       --accent:#6ea8ff;
-      --accent2:#34d399;
-      --danger:#fb7185;
-      --shadow: 0 18px 50px rgba(0,0,0,.35);
-      --radius: 18px;
+      --ok:#34d399;
+      --warn:#fb7185;
+      --shadow: 0 14px 40px rgba(0,0,0,.35);
+      --radius: 16px;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background:
-        radial-gradient(900px 600px at 15% 10%, rgba(110,168,255,.18), transparent 55%),
-        radial-gradient(900px 600px at 90% 20%, rgba(52,211,153,.14), transparent 55%),
-        radial-gradient(1000px 700px at 30% 100%, rgba(251,113,133,.10), transparent 60%),
+        radial-gradient(900px 600px at 15% 10%, rgba(110,168,255,.16), transparent 55%),
+        radial-gradient(900px 600px at 90% 20%, rgba(52,211,153,.12), transparent 55%),
         var(--bg);
       color:var(--text);
       min-height:100vh;
-      padding:24px;
+      padding:16px;
     }
-    .wrap{
-      max-width: 980px;
-      margin: 0 auto;
-    }
+    .wrap{ max-width: 980px; margin: 0 auto; }
     header{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:16px;
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:12px; margin-bottom:12px;
     }
-    .title{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    h1{
-      font-size: clamp(22px, 2.3vw, 30px);
-      margin:0;
-      letter-spacing:-0.02em;
-    }
-    .sub{
-      color:var(--muted);
-      margin:0;
-      font-size: 14px;
-      line-height:1.4;
-    }
+    h1{ margin:0; font-size: clamp(20px, 2.2vw, 28px); letter-spacing:-0.02em; }
+    .sub{ margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.35; }
     .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 12px;
-      border:1px solid var(--line);
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border:1px solid var(--line);
       background: rgba(255,255,255,.04);
-      border-radius:999px;
-      color:var(--muted);
-      font-size:13px;
-      white-space:nowrap;
+      border-radius:999px; color:var(--muted); font-size:12px; white-space:nowrap;
     }
+
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
     }
     .toolbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:14px 16px;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 12px;
       border-bottom:1px solid var(--line);
       background: rgba(0,0,0,.12);
-      gap:10px;
-      flex-wrap:wrap;
+      gap:10px; flex-wrap:wrap;
     }
-    .dateRow{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .field{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      color:var(--muted);
-      font-size:13px;
-    }
-    input[type="date"]{
+    .leftTools{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .field{ display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px; }
+    input[type="date"], .smallInput{
       background: rgba(255,255,255,.06);
       border:1px solid var(--line);
       color: var(--text);
-      padding:10px 12px;
+      padding:8px 10px;
       border-radius: 12px;
       outline:none;
+      font-size: 13px;
     }
-    .btns{display:flex; gap:10px; flex-wrap:wrap;}
+    .smallInput{
+      width: 110px;
+      text-align:right;
+      font-weight:700;
+    }
     button{
       border:1px solid var(--line);
       background: rgba(255,255,255,.06);
       color: var(--text);
-      padding:10px 12px;
+      padding:8px 10px;
       border-radius: 12px;
       cursor:pointer;
-      font-weight:600;
+      font-weight:700;
+      font-size: 13px;
       transition: transform .05s ease, background .2s ease, border-color .2s ease;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
+      display:inline-flex; align-items:center; gap:8px;
     }
     button:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.18); }
     button:active{ transform: translateY(1px); }
-    .primary{
-      border-color: rgba(110,168,255,.35);
-      background: rgba(110,168,255,.14);
-    }
-    .primary:hover{ background: rgba(110,168,255,.20); }
     .danger{
       border-color: rgba(251,113,133,.35);
       background: rgba(251,113,133,.12);
     }
-    .danger:hover{ background: rgba(251,113,133,.18); }
-    table{
-      width:100%;
-      border-collapse:collapse;
-    }
+
+    table{ width:100%; border-collapse:collapse; }
     thead th{
       text-align:left;
-      font-size:12px;
+      font-size:11px;
       letter-spacing:.08em;
       text-transform:uppercase;
       color: var(--muted);
-      padding:12px 16px;
+      padding:10px 12px;
       background: rgba(255,255,255,.03);
       border-bottom:1px solid var(--line);
+      white-space:nowrap;
     }
     tbody td{
-      padding: 12px 16px;
+      padding: 8px 12px; /* tighter */
       border-bottom:1px solid var(--line);
       vertical-align:middle;
     }
-    tbody tr:hover{
-      background: rgba(255,255,255,.03);
-    }
-    .denom{
-      font-weight:700;
-      letter-spacing:-0.01em;
-    }
-    .type{
+    tbody tr:hover{ background: rgba(255,255,255,.025); }
+
+    .denom{ font-weight:800; letter-spacing:-0.01em; }
+    .kind{
       display:inline-block;
-      margin-left:10px;
-      font-size:12px;
+      margin-left:8px;
+      font-size:11px;
       color: var(--muted);
-      font-weight:600;
-      padding:4px 8px;
+      font-weight:700;
+      padding:3px 7px;
       border-radius:999px;
       border:1px solid var(--line);
       background: rgba(255,255,255,.03);
     }
+
     .countInput{
-      width: 120px;
-      max-width: 100%;
-      font-size: 18px;
-      font-weight:700;
-      padding: 12px 14px;
+      width: 110px;
+      font-size: 16px;
+      font-weight:800;
+      padding: 10px 12px;
       border-radius: 14px;
       border: 1px solid var(--line);
       background: rgba(255,255,255,.06);
@@ -188,81 +140,110 @@
       border-color: rgba(110,168,255,.55);
       box-shadow: 0 0 0 4px rgba(110,168,255,.18);
     }
+
     .money{
       text-align:right;
       font-variant-numeric: tabular-nums;
-      font-weight:700;
+      font-weight:800;
+      white-space:nowrap;
     }
+
     tfoot td{
-      padding: 14px 16px;
+      padding: 10px 12px;
       background: rgba(52,211,153,.08);
       border-top: 1px solid rgba(52,211,153,.25);
-      font-weight:800;
+      font-weight:900;
     }
     .totalRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; flex-wrap:wrap;
+    }
+    .grand{ font-size: clamp(18px, 2vw, 24px); letter-spacing:-0.02em; }
+    .hint{ color: var(--muted); font-weight:700; font-size: 12px; }
+
+    .floatCard{
+      padding: 12px;
+      border-top:1px solid var(--line);
+      background: rgba(0,0,0,.10);
+      display:grid;
+      grid-template-columns: 1.2fr 1fr;
       gap:12px;
-      flex-wrap:wrap;
     }
-    .grand{
-      font-size: clamp(20px, 2.2vw, 28px);
-      letter-spacing:-0.02em;
-    }
-    .hint{
-      color: var(--muted);
-      font-weight:600;
-      font-size: 13px;
-    }
-    .footer{
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 12px;
-      display:flex;
-      justify-content:space-between;
-      flex-wrap:wrap;
-      gap:10px;
-    }
-    .kbd{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    .floatBox{
       border:1px solid var(--line);
       background: rgba(255,255,255,.04);
-      padding:2px 6px;
-      border-radius:8px;
-      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 10px;
     }
-    @media (max-width:640px){
-      .countInput{ width: 110px; }
-      tbody td, thead th, tfoot td{ padding-left:12px; padding-right:12px; }
+    .floatTitle{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px; flex-wrap:wrap;
+      margin-bottom:8px;
+    }
+    .floatTitle strong{ font-size:13px; }
+    .status{
+      font-size:12px;
+      font-weight:800;
+      padding:6px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255,255,255,.03);
+      white-space:nowrap;
+    }
+    .status.ok{ border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.12); color: #c9ffe8; }
+    .status.warn{ border-color: rgba(251,113,133,.35); background: rgba(251,113,133,.12); color: #ffe1e8; }
+
+    .plan{
+      margin:0;
+      padding-left: 18px;
+      color: var(--text);
+      font-size: 13px;
+      line-height:1.35;
+    }
+    .plan li{ margin:4px 0; }
+    .mono{ font-variant-numeric: tabular-nums; }
+
+    .rightCol{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    @media (max-width:760px){
+      .floatCard{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <header>
-      <div class="title">
+      <div>
         <h1>Cash Up Calculator</h1>
-        <p class="sub">Enter the count for each denomination — totals update instantly.</p>
+        <p class="sub">Enter counts. Press <strong>Enter</strong> to move forward (Shift+Enter goes back). Float planner leaves your target in the till.</p>
       </div>
-      <div class="chip" title="Auto-saves in this browser">
-        ✅ Auto-saves
-      </div>
+      <div class="chip">✅ Auto-saves</div>
     </header>
 
     <section class="card">
       <div class="toolbar">
-        <div class="dateRow">
+        <div class="leftTools">
           <div class="field">
             <span>Cash-up date</span>
             <input id="cashDate" type="date" />
           </div>
+
           <div class="field">
-            <span class="hint">Tip: press <span class="kbd">Tab</span> to fly through inputs</span>
+            <span>Float target</span>
+            <input id="floatTarget" class="smallInput" type="number" min="0" step="1" value="200" inputmode="numeric" />
           </div>
+
+          <div class="hint">Tip: Tab also works</div>
         </div>
-        <div class="btns">
-          <button class="primary" id="fillZero" type="button">↺ Set blanks to 0</button>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button id="fillZero" type="button">↺ Set blanks to 0</button>
           <button class="danger" id="clearAll" type="button">🗑️ Clear all</button>
         </div>
       </div>
@@ -271,15 +252,16 @@
         <table aria-label="Cash calculator table">
           <thead>
             <tr>
-              <th style="min-width:190px;">Denomination</th>
-              <th style="width:170px;">Count</th>
-              <th style="width:220px; text-align:right;">Line total</th>
+              <th style="min-width:180px;">Denomination</th>
+              <th style="width:160px;">Count</th>
+              <th style="width:190px; text-align:right;">Line total</th>
+              <th style="width:160px; text-align:right;">Suggested remove</th>
             </tr>
           </thead>
           <tbody id="rows"></tbody>
           <tfoot>
             <tr>
-              <td colspan="3">
+              <td colspan="4">
                 <div class="totalRow">
                   <div>
                     <div class="hint">Grand total</div>
@@ -292,50 +274,78 @@
           </tfoot>
         </table>
       </div>
-    </section>
 
-    <div class="footer">
-      <div>Currency: <strong>NZD</strong> (editable in code if you want other denominations).</div>
-      <div>Line totals are <strong>count × denomination</strong>.</div>
-    </div>
+      <div class="floatCard">
+        <div class="floatBox">
+          <div class="floatTitle">
+            <strong>Float plan (leave exactly <span class="mono" id="targetText">$200.00</span> in till)</strong>
+            <span id="floatStatus" class="status">—</span>
+          </div>
+          <div class="hint" id="removeSummary">Enter counts to see what to remove.</div>
+          <ul class="plan" id="removePlan"></ul>
+        </div>
+
+        <div class="rightCol">
+          <div class="floatBox">
+            <div class="floatTitle">
+              <strong>Remaining in till after removal</strong>
+              <span class="status ok" id="remainingBadge">$0.00</span>
+            </div>
+            <div class="hint">This is what you’ll have left if you remove the suggested mix.</div>
+          </div>
+
+          <div class="floatBox">
+            <div class="floatTitle">
+              <strong>Quick notes</strong>
+              <span class="status">NZD</span>
+            </div>
+            <div class="hint">
+              If you can’t make the target exactly (e.g., missing $5 notes), it’ll tell you what you’re short by.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script>
-    // NZ denominations (notes + coins)
+    // Use cents (integers) to avoid floating point issues
     const DENOMS = [
-      { label: "$100", value: 100, kind: "Note" },
-      { label: "$50",  value: 50,  kind: "Note" },
-      { label: "$20",  value: 20,  kind: "Note" },
-      { label: "$10",  value: 10,  kind: "Note" },
-      { label: "$5",   value: 5,   kind: "Note" },
+      { label: "$100", cents: 10000, kind: "Note" },
+      { label: "$50",  cents:  5000, kind: "Note" },
+      { label: "$20",  cents:  2000, kind: "Note" },
+      { label: "$10",  cents:  1000, kind: "Note" },
+      { label: "$5",   cents:   500, kind: "Note" },
 
-      { label: "$2",   value: 2,   kind: "Coin" },
-      { label: "$1",   value: 1,   kind: "Coin" },
-      { label: "50c",  value: 0.50,kind: "Coin" },
-      { label: "20c",  value: 0.20,kind: "Coin" },
-      { label: "10c",  value: 0.10,kind: "Coin" },
+      { label: "$2",   cents:   200, kind: "Coin" },
+      { label: "$1",   cents:   100, kind: "Coin" },
+      { label: "50c",  cents:    50, kind: "Coin" },
+      { label: "20c",  cents:    20, kind: "Coin" },
+      { label: "10c",  cents:    10, kind: "Coin" },
     ];
 
-    const storageKey = "cashup_counts_v1";
+    const storageKey = "cashup_counts_v2";
     const rowsEl = document.getElementById("rows");
     const grandTotalEl = document.getElementById("grandTotal");
     const itemsSummaryEl = document.getElementById("itemsSummary");
     const cashDateEl = document.getElementById("cashDate");
+    const floatTargetEl = document.getElementById("floatTarget");
+    const targetTextEl = document.getElementById("targetText");
+    const floatStatusEl = document.getElementById("floatStatus");
+    const removeSummaryEl = document.getElementById("removeSummary");
+    const removePlanEl = document.getElementById("removePlan");
+    const remainingBadgeEl = document.getElementById("remainingBadge");
 
-    const fmt = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
+    const fmtNZD = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
+    const fmtMoneyFromCents = (cents) => fmtNZD.format((cents || 0) / 100);
 
     function loadState(){
-      try{
-        return JSON.parse(localStorage.getItem(storageKey) || "{}");
-      }catch{
-        return {};
-      }
+      try { return JSON.parse(localStorage.getItem(storageKey) || "{}"); }
+      catch { return {}; }
     }
-
     function saveState(state){
       localStorage.setItem(storageKey, JSON.stringify(state));
     }
-
     const state = loadState();
 
     // Default date to today if empty
@@ -345,9 +355,20 @@
     const dd = String(today.getDate()).padStart(2,"0");
     cashDateEl.value = state.cashDate || `${yyyy}-${mm}-${dd}`;
 
+    // Default float target
+    floatTargetEl.value = (state.floatTarget !== undefined) ? state.floatTarget : 200;
+
     cashDateEl.addEventListener("change", () => {
       state.cashDate = cashDateEl.value;
       saveState(state);
+    });
+
+    floatTargetEl.addEventListener("input", () => {
+      const v = Math.max(0, Math.floor(Number(floatTargetEl.value || 0)));
+      floatTargetEl.value = String(v);
+      state.floatTarget = v;
+      saveState(state);
+      recalc();
     });
 
     function buildRows(){
@@ -357,7 +378,7 @@
         const tr = document.createElement("tr");
 
         const tdDenom = document.createElement("td");
-        tdDenom.innerHTML = `<span class="denom">${d.label}</span><span class="type">${d.kind}</span>`;
+        tdDenom.innerHTML = `<span class="denom">${d.label}</span><span class="kind">${d.kind}</span>`;
 
         const tdCount = document.createElement("td");
         const input = document.createElement("input");
@@ -374,6 +395,20 @@
         // Stop mouse wheel changing values accidentally
         input.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
 
+        // Enter = next field, Shift+Enter = previous field
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            const inputs = Array.from(document.querySelectorAll(".countInput"));
+            const i = inputs.indexOf(input);
+            if (i === -1) return;
+            const nextIndex = e.shiftKey ? i - 1 : i + 1;
+            const target = inputs[Math.max(0, Math.min(inputs.length - 1, nextIndex))];
+            target.focus();
+            target.select?.();
+          }
+        });
+
         input.addEventListener("input", () => {
           if(!state.counts) state.counts = {};
           const v = input.value === "" ? "" : Math.max(0, Math.floor(Number(input.value) || 0));
@@ -388,47 +423,174 @@
         const tdLine = document.createElement("td");
         tdLine.className = "money";
         tdLine.id = `line-${idx}`;
-        tdLine.textContent = fmt.format(0);
+        tdLine.textContent = fmtMoneyFromCents(0);
+
+        const tdRemove = document.createElement("td");
+        tdRemove.className = "money";
+        tdRemove.id = `remove-${idx}`;
+        tdRemove.textContent = "—";
 
         tr.appendChild(tdDenom);
         tr.appendChild(tdCount);
         tr.appendChild(tdLine);
+        tr.appendChild(tdRemove);
 
         rowsEl.appendChild(tr);
       });
     }
 
-    function recalc(){
-      let total = 0;
+    function getCounts(){
+      const counts = [];
+      DENOMS.forEach((_, idx) => {
+        const c = (state.counts && state.counts[idx] !== undefined && state.counts[idx] !== "")
+          ? Number(state.counts[idx]) : 0;
+        counts[idx] = Number.isFinite(c) ? c : 0;
+      });
+      return counts;
+    }
+
+    function computeTotals(counts){
+      let totalCents = 0;
       let items = 0;
 
       DENOMS.forEach((d, idx) => {
-        const count = (state.counts && state.counts[idx] !== undefined && state.counts[idx] !== "")
-          ? Number(state.counts[idx]) : 0;
-
+        const count = counts[idx] || 0;
         if (count > 0) items += count;
 
-        const line = count * d.value;
-        total += line;
+        const line = count * d.cents;
+        totalCents += line;
 
         const lineEl = document.getElementById(`line-${idx}`);
-        if (lineEl) lineEl.textContent = fmt.format(line);
+        if (lineEl) lineEl.textContent = fmtMoneyFromCents(line);
       });
 
-      grandTotalEl.textContent = fmt.format(total);
+      return { totalCents, items };
+    }
 
+    // Greedy removal plan, constrained by available counts
+    function computeRemovalPlan(counts, totalCents, targetCents){
+      // Clear remove column initially
+      DENOMS.forEach((_, idx) => {
+        const el = document.getElementById(`remove-${idx}`);
+        if (el) el.textContent = "—";
+      });
+
+      const removeCents = totalCents - targetCents;
+
+      if (removeCents < 0) {
+        return {
+          ok: false,
+          message: `You’re short by ${fmtMoneyFromCents(-removeCents)} to reach the target float.`,
+          removeCents: 0,
+          plan: [],
+          remainingCents: totalCents
+        };
+      }
+
+      if (removeCents === 0) {
+        return {
+          ok: true,
+          message: `No removal needed — you’re already at the target.`,
+          removeCents: 0,
+          plan: [],
+          remainingCents: totalCents
+        };
+      }
+
+      let remainingToRemove = removeCents;
+      const plan = [];
+
+      for (let i = 0; i < DENOMS.length; i++){
+        const denom = DENOMS[i];
+        const available = counts[i] || 0;
+        if (available <= 0) continue;
+
+        const maxNeeded = Math.floor(remainingToRemove / denom.cents);
+        if (maxNeeded <= 0) continue;
+
+        const take = Math.min(available, maxNeeded);
+        if (take > 0) {
+          plan.push({ idx: i, label: denom.label, count: take, centsEach: denom.cents });
+          remainingToRemove -= take * denom.cents;
+        }
+
+        if (remainingToRemove === 0) break;
+      }
+
+      const removedCents = removeCents - remainingToRemove;
+      const remainingCents = totalCents - removedCents;
+
+      // Fill "Suggested remove" column
+      plan.forEach(p => {
+        const el = document.getElementById(`remove-${p.idx}`);
+        if (el) el.textContent = `${p.count} (${fmtMoneyFromCents(p.count * p.centsEach)})`;
+      });
+
+      if (remainingToRemove !== 0) {
+        return {
+          ok: false,
+          message: `Can’t make the target exactly with what’s in the till. You can remove ${fmtMoneyFromCents(removedCents)}, but you’ll still need ${fmtMoneyFromCents(remainingToRemove)} more (missing exact denominations).`,
+          removeCents: removedCents,
+          plan,
+          remainingCents
+        };
+      }
+
+      return {
+        ok: true,
+        message: `Remove ${fmtMoneyFromCents(removeCents)} to leave exactly ${fmtMoneyFromCents(targetCents)}.`,
+        removeCents: removeCents,
+        plan,
+        remainingCents
+      };
+    }
+
+    function recalc(){
+      const counts = getCounts();
+      const { totalCents, items } = computeTotals(counts);
+
+      grandTotalEl.textContent = fmtMoneyFromCents(totalCents);
       itemsSummaryEl.textContent =
         items === 0 ? "0 items entered"
         : items === 1 ? "1 item entered"
         : `${items.toLocaleString("en-NZ")} items entered`;
+
+      const targetDollars = Math.max(0, Math.floor(Number(floatTargetEl.value || 0)));
+      const targetCents = targetDollars * 100;
+      targetTextEl.textContent = fmtMoneyFromCents(targetCents);
+
+      const plan = computeRemovalPlan(counts, totalCents, targetCents);
+
+      removePlanEl.innerHTML = "";
+      if (plan.plan.length > 0) {
+        plan.plan.forEach(p => {
+          const li = document.createElement("li");
+          const lineCents = p.count * p.centsEach;
+          li.innerHTML = `<span class="mono">${p.count} × ${p.label}</span> = <span class="mono">${fmtMoneyFromCents(lineCents)}</span>`;
+          removePlanEl.appendChild(li);
+        });
+      }
+
+      remainingBadgeEl.textContent = fmtMoneyFromCents(plan.remainingCents);
+
+      if (items === 0) {
+        floatStatusEl.className = "status";
+        floatStatusEl.textContent = "—";
+        removeSummaryEl.textContent = "Enter counts to see what to remove.";
+        removePlanEl.innerHTML = "";
+        remainingBadgeEl.textContent = fmtMoneyFromCents(0);
+        // Clear remove column dashes already done inside computeRemovalPlan call, but totals are 0 anyway.
+        return;
+      }
+
+      floatStatusEl.className = "status " + (plan.ok ? "ok" : "warn");
+      floatStatusEl.textContent = plan.ok ? "OK" : "Needs attention";
+      removeSummaryEl.textContent = plan.message;
     }
 
     document.getElementById("clearAll").addEventListener("click", () => {
-      // Clear counts but keep date
       state.counts = {};
       saveState(state);
-
-      // Reset inputs
       document.querySelectorAll(".countInput").forEach(i => i.value = "");
       recalc();
     });
@@ -450,4 +612,3 @@
   </script>
 </body>
 </html>
-
