@@ -127,6 +127,41 @@
       margin-top:6px;
     }
 
+    /* Slide-in on first appearance */
+    @keyframes bannerSlideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
+    .banner.slide-in {
+      animation: bannerSlideIn 220ms ease-out;
+    }
+
+    /* Pulse on update */
+    @keyframes pulseOk {
+      0%   { box-shadow: 0 0 0 0 rgba(250,204,21,.5); }
+      70%  { box-shadow: 0 0 0 10px rgba(250,204,21,0); }
+      100% { box-shadow: 0 0 0 0 rgba(250,204,21,0); }
+    }
+    @keyframes pulseBad {
+      0%   { box-shadow: 0 0 0 0 rgba(251,113,133,.5); }
+      70%  { box-shadow: 0 0 0 10px rgba(251,113,133,0); }
+      100% { box-shadow: 0 0 0 0 rgba(251,113,133,0); }
+    }
+    .banner.animate-ok { animation: pulseOk 0.7s ease-out; }
+    .banner.animate-bad { animation: pulseBad 0.7s ease-out; }
+
+    /* Row flash animation */
+    @keyframes rowFlashOk {
+      0% { background-color: rgba(250,204,21,.25); }
+      100% { background-color: transparent; }
+    }
+    @keyframes rowFlashBad {
+      0% { background-color: rgba(251,113,133,.25); }
+      100% { background-color: transparent; }
+    }
+    tbody tr.flash-ok { animation: rowFlashOk 0.6s ease-out; }
+    tbody tr.flash-bad { animation: rowFlashBad 0.6s ease-out; }
+
     .card{
       border: 1px solid var(--line);
       border-radius: var(--radius);
@@ -455,9 +490,21 @@
     const fmtNZD = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
     const moneyFromCents = (c) => fmtNZD.format((c || 0) / 100);
 
+    // Slide-in only the first time the banner appears (per session)
+    let bannerHasAppeared = false;
+
+    // Avoid spamming haptics/animations on every keystroke if the plan didn't change
+    let lastPlanSignature = "";
+
     // New session each time: no storage. Date defaults to today.
     const today = new Date();
     cashDateEl.value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+
+    function haptic(mode){
+      if (!("vibrate" in navigator)) return;
+      const pattern = (mode === "bad") ? [18, 25, 18] : [10];
+      try { navigator.vibrate(pattern); } catch {}
+    }
 
     function buildRows(){
       rowsEl.innerHTML = "";
@@ -479,10 +526,8 @@
         input.autocomplete = "off";
         input.setAttribute("aria-label", `Count for ${d.label}`);
 
-        // Stop mouse wheel changing values accidentally
         input.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
 
-        // Enter = next field, Shift+Enter = previous field
         input.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
             e.preventDefault();
@@ -511,12 +556,12 @@
         const tdRemoveQty = document.createElement("td");
         tdRemoveQty.className = "removeQty";
         tdRemoveQty.id = `removeQty-${idx}`;
-        tdRemoveQty.innerHTML = ""; // hidden when zero
+        tdRemoveQty.innerHTML = "";
 
         const tdRemoveAmt = document.createElement("td");
         tdRemoveAmt.className = "money";
         tdRemoveAmt.id = `removeAmt-${idx}`;
-        tdRemoveAmt.textContent = ""; // hidden when zero
+        tdRemoveAmt.textContent = "";
 
         tr.appendChild(tdDenom);
         tr.appendChild(tdCount);
@@ -558,28 +603,50 @@
         const r = document.getElementById(`row-${idx}`);
         if (q) q.innerHTML = "";
         if (a) a.textContent = "";
-        if (r) {
-          r.classList.remove("to-remove","ok","bad");
-        }
+        if (r) r.classList.remove("to-remove","ok","bad","flash-ok","flash-bad");
       });
     }
 
     function hideBanner(){
       removeBannerEl.style.display = "none";
-      removeBannerEl.classList.remove("ok","bad");
+      removeBannerEl.classList.remove("ok","bad","slide-in","animate-ok","animate-bad");
       removeBannerTextEl.textContent = "—";
       removeBannerAmtEl.textContent = moneyFromCents(0);
       removeBannerHintEl.textContent = "Use the highlighted rows below as your pick list.";
     }
 
     function showBanner({ text, amtCents, mode, hint }){
+      const wasHidden = (removeBannerEl.style.display === "none" || removeBannerEl.style.display === "");
+
       removeBannerEl.style.display = "block";
       removeBannerEl.classList.remove("ok","bad");
       if (mode === "ok") removeBannerEl.classList.add("ok");
       if (mode === "bad") removeBannerEl.classList.add("bad");
+
       removeBannerTextEl.textContent = text;
       removeBannerAmtEl.textContent = moneyFromCents(amtCents);
       removeBannerHintEl.textContent = hint || "Use the highlighted rows below as your pick list.";
+
+      // Slide-in only on first appearance (per session)
+      if (!bannerHasAppeared && wasHidden) {
+        bannerHasAppeared = true;
+        removeBannerEl.classList.remove("slide-in");
+        void removeBannerEl.offsetWidth;
+        removeBannerEl.classList.add("slide-in");
+      }
+    }
+
+    function animateBanner(mode){
+      removeBannerEl.classList.remove("animate-ok","animate-bad");
+      void removeBannerEl.offsetWidth; // restart
+      if (mode === "ok") removeBannerEl.classList.add("animate-ok");
+      if (mode === "bad") removeBannerEl.classList.add("animate-bad");
+    }
+
+    function flashRow(rowEl, mode){
+      rowEl.classList.remove("flash-ok","flash-bad");
+      void rowEl.offsetWidth;
+      rowEl.classList.add(mode === "ok" ? "flash-ok" : "flash-bad");
     }
 
     function computeRemovalPlan(counts, totalCents, targetCents){
@@ -589,26 +656,26 @@
       const needToRemove = totalCents - targetCents;
 
       if (needToRemove < 0) {
-        // No removal (short)
         return {
           ok:false,
           message:`You’re short by ${moneyFromCents(-needToRemove)} to reach the target float.`,
           plan:[],
           removedCents:0,
           remainingCents: totalCents,
-          leftoverNeed: -needToRemove
+          leftoverNeed: -needToRemove,
+          planSig: `short:${-needToRemove}`
         };
       }
 
       if (needToRemove === 0) {
-        // Perfect already
         return {
           ok:true,
           message:`No removal needed — you’re already at the target.`,
           plan:[],
           removedCents:0,
           remainingCents: totalCents,
-          leftoverNeed: 0
+          leftoverNeed: 0,
+          planSig: `none`
         };
       }
 
@@ -638,6 +705,12 @@
       const isExact = (remainingToRemove === 0);
       const mode = isExact ? "ok" : "bad";
 
+      const bannerParts = plan.map(p => `${p.count}×${p.label}`);
+      const bannerText = bannerParts.length ? bannerParts.join(" · ") : "—";
+
+      // signature to detect change
+      const planSig = `${mode}|need:${needToRemove}|removed:${removedCents}|left:${remainingToRemove}|${bannerText}`;
+
       // Populate remove columns ONLY for >0, highlight row
       plan.forEach(p => {
         const qtyEl = document.getElementById(`removeQty-${p.idx}`);
@@ -650,22 +723,19 @@
 
         if (rowEl){
           rowEl.classList.add("to-remove", mode);
+          // Flash rows only if plan changed (handled in recalc using planSig)
         }
       });
 
-      // Banner text like: 1×$100 · 1×$50 · 2×$20
-      const bannerParts = plan.map(p => `${p.count}×${p.label}`);
-      const bannerText = bannerParts.length ? bannerParts.join(" · ") : "—";
-
       if (!bannerParts.length){
-        // Nothing removable despite needing removal (rare if target > total? but handled above)
         return {
           ok:false,
           message:`No removable denominations available.`,
           plan:[],
           removedCents:0,
           remainingCents: totalCents,
-          leftoverNeed: needToRemove
+          leftoverNeed: needToRemove,
+          planSig: `norem:${needToRemove}`
         };
       }
 
@@ -682,7 +752,9 @@
           plan,
           removedCents,
           remainingCents,
-          leftoverNeed: remainingToRemove
+          leftoverNeed: remainingToRemove,
+          mode,
+          planSig
         };
       }
 
@@ -699,7 +771,9 @@
         plan,
         removedCents: needToRemove,
         remainingCents,
-        leftoverNeed: 0
+        leftoverNeed: 0,
+        mode,
+        planSig
       };
     }
 
@@ -739,12 +813,33 @@
         remainingBadgeEl.textContent = moneyFromCents(0);
         clearRemoveColumnsAndHighlights();
         hideBanner();
+        lastPlanSignature = "";
         return;
       }
 
       floatStatusEl.className = "status " + (plan.ok ? "ok" : "warn");
       floatStatusEl.textContent = plan.ok ? "OK" : "Issue";
       removeSummaryEl.textContent = plan.message;
+
+      // Animate + haptic only when the plan meaningfully changes
+      if (plan.planSig && plan.planSig !== lastPlanSignature) {
+        lastPlanSignature = plan.planSig;
+
+        // Banner pulse (only if visible)
+        if (removeBannerEl.style.display !== "none" && (plan.mode === "ok" || plan.mode === "bad")) {
+          animateBanner(plan.mode);
+          haptic(plan.mode);
+        }
+
+        // Flash each highlighted row
+        DENOMS.forEach((_, idx) => {
+          const rowEl = document.getElementById(`row-${idx}`);
+          if (!rowEl) return;
+          if (rowEl.classList.contains("to-remove")) {
+            flashRow(rowEl, rowEl.classList.contains("bad") ? "bad" : "ok");
+          }
+        });
+      }
     }
 
     document.getElementById("clearAll").addEventListener("click", () => {
@@ -765,6 +860,15 @@
 
     buildRows();
     recalc();
+
+    // Auto-focus first denomination on load
+    window.addEventListener("load", () => {
+      const firstInput = document.querySelector(".countInput");
+      if (firstInput) {
+        firstInput.focus();
+        firstInput.select();
+      }
+    });
   </script>
 </body>
 </html>
