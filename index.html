@@ -16,6 +16,8 @@
       --warn:#fb7185;
       --yellow: rgba(250, 204, 21, .24);
       --yellowBorder: rgba(250, 204, 21, .55);
+      --rowGlow: rgba(250, 204, 21, .08);
+      --rowGlow2: rgba(250, 204, 21, .04);
     }
     *{box-sizing:border-box}
     body{
@@ -70,7 +72,7 @@
     .smallInput{
       width: 110px;
       text-align:right;
-      font-weight:900;
+      font-weight:950;
     }
     button{
       border:1px solid var(--line);
@@ -79,7 +81,7 @@
       padding:8px 10px;
       border-radius: 12px;
       cursor:pointer;
-      font-weight:900;
+      font-weight:950;
       font-size: 13px;
       transition: transform .05s ease, background .2s ease, border-color .2s ease;
       display:inline-flex; align-items:center; gap:8px;
@@ -110,13 +112,21 @@
     }
     tbody tr:hover{ background: rgba(255,255,255,.025); }
 
+    /* Highlight rows where something should be removed */
+    tbody tr.to-remove{
+      background: linear-gradient(90deg, var(--rowGlow), var(--rowGlow2));
+    }
+    tbody tr.to-remove:hover{
+      background: linear-gradient(90deg, rgba(250,204,21,.10), rgba(250,204,21,.06));
+    }
+
     .denom{ font-weight:950; letter-spacing:-0.01em; }
     .kind{
       display:inline-block;
       margin-left:8px;
       font-size:11px;
       color: var(--muted);
-      font-weight:900;
+      font-weight:950;
       padding:3px 7px;
       border-radius:999px;
       border:1px solid var(--line);
@@ -175,7 +185,7 @@
       gap:12px; flex-wrap:wrap;
     }
     .grand{ font-size: clamp(18px, 2vw, 24px); letter-spacing:-0.02em; }
-    .hint{ color: var(--muted); font-weight:900; font-size: 12px; }
+    .hint{ color: var(--muted); font-weight:950; font-size: 12px; }
 
     .floatCard{
       padding: 12px;
@@ -349,6 +359,7 @@
       rowsEl.innerHTML = "";
       DENOMS.forEach((d, idx) => {
         const tr = document.createElement("tr");
+        tr.id = `row-${idx}`;
 
         const tdDenom = document.createElement("td");
         tdDenom.innerHTML = `<span class="denom">${d.label}</span><span class="kind">${d.kind}</span>`;
@@ -434,17 +445,19 @@
       return { totalCents, items };
     }
 
-    function clearRemoveColumns(){
+    function clearRemoveColumnsAndHighlights(){
       DENOMS.forEach((_, idx) => {
         const q = document.getElementById(`removeQty-${idx}`);
         const a = document.getElementById(`removeAmt-${idx}`);
-        if (q) q.innerHTML = "";       // hide zeros
-        if (a) a.textContent = "";     // hide zeros
+        const r = document.getElementById(`row-${idx}`);
+        if (q) q.innerHTML = "";
+        if (a) a.textContent = "";
+        if (r) r.classList.remove("to-remove");
       });
     }
 
     function computeRemovalPlan(counts, totalCents, targetCents){
-      clearRemoveColumns();
+      clearRemoveColumnsAndHighlights();
 
       const needToRemove = totalCents - targetCents;
 
@@ -493,14 +506,16 @@
       const removedCents = needToRemove - remainingToRemove;
       const remainingCents = totalCents - removedCents;
 
-      // Populate remove columns ONLY for > 0
+      // Populate remove columns ONLY for > 0, and highlight the row
       plan.forEach(p => {
         const qtyEl = document.getElementById(`removeQty-${p.idx}`);
         const amtEl = document.getElementById(`removeAmt-${p.idx}`);
+        const rowEl = document.getElementById(`row-${p.idx}`);
         const lineCents = p.count * p.centsEach;
 
         if (qtyEl) qtyEl.innerHTML = `<span class="pill">${p.count}</span>`;
         if (amtEl) amtEl.textContent = moneyFromCents(lineCents);
+        if (rowEl) rowEl.classList.add("to-remove");
       });
 
       if (remainingToRemove !== 0) {
@@ -558,10 +573,33 @@
         removeSummaryEl.textContent = "Enter counts to see what to remove.";
         removePlanEl.innerHTML = "";
         remainingBadgeEl.textContent = moneyFromCents(0);
-        clearRemoveColumns();
+        clearRemoveColumnsAndHighlights();
         return;
       }
 
       floatStatusEl.className = "status " + (plan.ok ? "ok" : "warn");
       floatStatusEl.textContent = plan.ok ? "OK" : "Needs attention";
-      removeSummaryEl.textContent = plan.mes
+      removeSummaryEl.textContent = plan.message;
+    }
+
+    document.getElementById("clearAll").addEventListener("click", () => {
+      document.querySelectorAll(".countInput").forEach(i => i.value = "");
+      recalc();
+    });
+
+    document.getElementById("fillZero").addEventListener("click", () => {
+      document.querySelectorAll(".countInput").forEach(i => { if (i.value === "") i.value = "0"; });
+      recalc();
+    });
+
+    floatTargetEl.addEventListener("input", () => {
+      const v = Math.max(0, Math.floor(Number(floatTargetEl.value || 0)));
+      floatTargetEl.value = String(v);
+      recalc();
+    });
+
+    buildRows();
+    recalc();
+  </script>
+</body>
+</html>
