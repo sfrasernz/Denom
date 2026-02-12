@@ -44,6 +44,51 @@
       background: rgba(255,255,255,.04);
       border-radius:999px; color:var(--muted); font-size:12px; white-space:nowrap;
     }
+
+    /* Remove summary banner */
+    .banner{
+      display:none;
+      margin: 0 0 12px 0;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(250,204,21,.35);
+      background: linear-gradient(90deg, rgba(250,204,21,.14), rgba(255,255,255,.03));
+      box-shadow: 0 10px 24px rgba(0,0,0,.22);
+    }
+    .bannerRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .banner strong{
+      font-size: 13px;
+      letter-spacing: -0.01em;
+    }
+    .bannerText{
+      color: var(--text);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      line-height:1.35;
+    }
+    .bannerAmt{
+      color: #fff7cc;
+      font-weight: 950;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(250,204,21,.45);
+      background: rgba(250,204,21,.18);
+    }
+    .bannerHint{
+      color: var(--muted);
+      font-size:12px;
+      font-weight:800;
+      margin-top:6px;
+    }
+
     .card{
       border: 1px solid var(--line);
       border-radius: var(--radius);
@@ -112,7 +157,6 @@
     }
     tbody tr:hover{ background: rgba(255,255,255,.025); }
 
-    /* Highlight rows where something should be removed */
     tbody tr.to-remove{
       background: linear-gradient(90deg, var(--rowGlow), var(--rowGlow2));
     }
@@ -230,9 +274,9 @@
     .mono{ font-variant-numeric: tabular-nums; }
 
     @media (max-width:760px){
-      .floatCard{ grid-template-columns: 1fr; }
       .countInput{ width: 100px; }
       tbody td, thead th, tfoot td{ padding-left:10px; padding-right:10px; }
+      .floatCard{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -249,6 +293,17 @@
       </div>
       <div class="chip">🧼 No saved sessions</div>
     </header>
+
+    <!-- Remove Summary Banner -->
+    <div class="banner" id="removeBanner" role="status" aria-live="polite">
+      <div class="bannerRow">
+        <div class="bannerText">
+          <strong>Remove:</strong> <span id="removeBannerText">—</span>
+        </div>
+        <div class="bannerAmt" id="removeBannerAmt">$0.00</div>
+      </div>
+      <div class="bannerHint" id="removeBannerHint">Use the highlighted rows below as your pick list.</div>
+    </div>
 
     <section class="card">
       <div class="toolbar">
@@ -348,6 +403,11 @@
     const removePlanEl = document.getElementById("removePlan");
     const remainingBadgeEl = document.getElementById("remainingBadge");
 
+    const removeBannerEl = document.getElementById("removeBanner");
+    const removeBannerTextEl = document.getElementById("removeBannerText");
+    const removeBannerAmtEl = document.getElementById("removeBannerAmt");
+    const removeBannerHintEl = document.getElementById("removeBannerHint");
+
     const fmtNZD = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
     const moneyFromCents = (c) => fmtNZD.format((c || 0) / 100);
 
@@ -405,12 +465,12 @@
         const tdRemoveQty = document.createElement("td");
         tdRemoveQty.className = "removeQty";
         tdRemoveQty.id = `removeQty-${idx}`;
-        tdRemoveQty.innerHTML = ""; // hidden when zero
+        tdRemoveQty.innerHTML = "";
 
         const tdRemoveAmt = document.createElement("td");
         tdRemoveAmt.className = "money";
         tdRemoveAmt.id = `removeAmt-${idx}`;
-        tdRemoveAmt.textContent = ""; // hidden when zero
+        tdRemoveAmt.textContent = "";
 
         tr.appendChild(tdDenom);
         tr.appendChild(tdCount);
@@ -456,31 +516,32 @@
       });
     }
 
+    function hideBanner(){
+      removeBannerEl.style.display = "none";
+      removeBannerTextEl.textContent = "—";
+      removeBannerAmtEl.textContent = moneyFromCents(0);
+      removeBannerHintEl.textContent = "Use the highlighted rows below as your pick list.";
+    }
+
+    function showBanner(text, amtCents, hint){
+      removeBannerEl.style.display = "block";
+      removeBannerTextEl.textContent = text;
+      removeBannerAmtEl.textContent = moneyFromCents(amtCents);
+      removeBannerHintEl.textContent = hint || "Use the highlighted rows below as your pick list.";
+    }
+
     function computeRemovalPlan(counts, totalCents, targetCents){
       clearRemoveColumnsAndHighlights();
+      hideBanner();
 
       const needToRemove = totalCents - targetCents;
 
       if (needToRemove < 0) {
-        return {
-          ok: false,
-          message: `You’re short by ${moneyFromCents(-needToRemove)} to reach the target float.`,
-          plan: [],
-          removedCents: 0,
-          remainingCents: totalCents,
-          leftoverNeed: -needToRemove
-        };
+        return { ok:false, message:`You’re short by ${moneyFromCents(-needToRemove)} to reach the target float.`, plan:[], removedCents:0, remainingCents: totalCents, leftoverNeed: -needToRemove };
       }
 
       if (needToRemove === 0) {
-        return {
-          ok: true,
-          message: `No removal needed — you’re already at the target.`,
-          plan: [],
-          removedCents: 0,
-          remainingCents: totalCents,
-          leftoverNeed: 0
-        };
+        return { ok:true, message:`No removal needed — you’re already at the target.`, plan:[], removedCents:0, remainingCents: totalCents, leftoverNeed: 0 };
       }
 
       let remainingToRemove = needToRemove;
@@ -506,7 +567,7 @@
       const removedCents = needToRemove - remainingToRemove;
       const remainingCents = totalCents - removedCents;
 
-      // Populate remove columns ONLY for > 0, and highlight the row
+      // Populate remove columns ONLY for >0, highlight row
       plan.forEach(p => {
         const qtyEl = document.getElementById(`removeQty-${p.idx}`);
         const amtEl = document.getElementById(`removeAmt-${p.idx}`);
@@ -518,10 +579,19 @@
         if (rowEl) rowEl.classList.add("to-remove");
       });
 
+      // Banner text like: 1×$100 · 1×$50 · 2×$20
+      const bannerParts = plan.map(p => `${p.count}×${p.label}`);
+      const bannerText = bannerParts.length ? bannerParts.join(" · ") : "—";
+
       if (remainingToRemove !== 0) {
+        showBanner(
+          bannerText,
+          removedCents,
+          `Can’t hit target exactly — still need ${moneyFromCents(remainingToRemove)} more (missing denominations).`
+        );
         return {
-          ok: false,
-          message: `Can’t make the target exactly with your mix. You can remove ${moneyFromCents(removedCents)}, but you still need ${moneyFromCents(remainingToRemove)} more (missing exact denominations).`,
+          ok:false,
+          message:`Can’t make the target exactly with your mix. You can remove ${moneyFromCents(removedCents)}, but you still need ${moneyFromCents(remainingToRemove)} more (missing exact denominations).`,
           plan,
           removedCents,
           remainingCents,
@@ -529,11 +599,12 @@
         };
       }
 
+      showBanner(bannerText, needToRemove, "Use the highlighted rows below as your pick list.");
       return {
-        ok: true,
-        message: `Remove ${moneyFromCents(needToRemove)} to leave exactly ${moneyFromCents(targetCents)}.`,
+        ok:true,
+        message:`Remove ${moneyFromCents(needToRemove)} to leave exactly ${moneyFromCents(targetCents)}.`,
         plan,
-        removedCents,
+        removedCents: needToRemove,
         remainingCents,
         leftoverNeed: 0
       };
@@ -574,6 +645,7 @@
         removePlanEl.innerHTML = "";
         remainingBadgeEl.textContent = moneyFromCents(0);
         clearRemoveColumnsAndHighlights();
+        hideBanner();
         return;
       }
 
