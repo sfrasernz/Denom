@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cash Up Calculator</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#0f1a2e;
+      --card2:#0c172a;
+      --text:#eaf0ff;
+      --muted:#9fb0d1;
+      --line:rgba(255,255,255,.10);
+      --accent:#6ea8ff;
+      --accent2:#34d399;
+      --danger:#fb7185;
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background:
+        radial-gradient(900px 600px at 15% 10%, rgba(110,168,255,.18), transparent 55%),
+        radial-gradient(900px 600px at 90% 20%, rgba(52,211,153,.14), transparent 55%),
+        radial-gradient(1000px 700px at 30% 100%, rgba(251,113,133,.10), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      padding:24px;
+    }
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:16px;
+    }
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    h1{
+      font-size: clamp(22px, 2.3vw, 30px);
+      margin:0;
+      letter-spacing:-0.02em;
+    }
+    .sub{
+      color:var(--muted);
+      margin:0;
+      font-size: 14px;
+      line-height:1.4;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      border-radius:999px;
+      color:var(--muted);
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .toolbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      background: rgba(0,0,0,.12);
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .dateRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .field{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    input[type="date"]{
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius: 12px;
+      outline:none;
+    }
+    .btns{display:flex; gap:10px; flex-wrap:wrap;}
+    button{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight:600;
+      transition: transform .05s ease, background .2s ease, border-color .2s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    button:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.18); }
+    button:active{ transform: translateY(1px); }
+    .primary{
+      border-color: rgba(110,168,255,.35);
+      background: rgba(110,168,255,.14);
+    }
+    .primary:hover{ background: rgba(110,168,255,.20); }
+    .danger{
+      border-color: rgba(251,113,133,.35);
+      background: rgba(251,113,133,.12);
+    }
+    .danger:hover{ background: rgba(251,113,133,.18); }
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+    thead th{
+      text-align:left;
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color: var(--muted);
+      padding:12px 16px;
+      background: rgba(255,255,255,.03);
+      border-bottom:1px solid var(--line);
+    }
+    tbody td{
+      padding: 12px 16px;
+      border-bottom:1px solid var(--line);
+      vertical-align:middle;
+    }
+    tbody tr:hover{
+      background: rgba(255,255,255,.03);
+    }
+    .denom{
+      font-weight:700;
+      letter-spacing:-0.01em;
+    }
+    .type{
+      display:inline-block;
+      margin-left:10px;
+      font-size:12px;
+      color: var(--muted);
+      font-weight:600;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+    }
+    .countInput{
+      width: 120px;
+      max-width: 100%;
+      font-size: 18px;
+      font-weight:700;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      outline:none;
+      text-align:right;
+    }
+    .countInput:focus{
+      border-color: rgba(110,168,255,.55);
+      box-shadow: 0 0 0 4px rgba(110,168,255,.18);
+    }
+    .money{
+      text-align:right;
+      font-variant-numeric: tabular-nums;
+      font-weight:700;
+    }
+    tfoot td{
+      padding: 14px 16px;
+      background: rgba(52,211,153,.08);
+      border-top: 1px solid rgba(52,211,153,.25);
+      font-weight:800;
+    }
+    .totalRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .grand{
+      font-size: clamp(20px, 2.2vw, 28px);
+      letter-spacing:-0.02em;
+    }
+    .hint{
+      color: var(--muted);
+      font-weight:600;
+      font-size: 13px;
+    }
+    .footer{
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      display:flex;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      padding:2px 6px;
+      border-radius:8px;
+      color: var(--text);
+    }
+    @media (max-width:640px){
+      .countInput{ width: 110px; }
+      tbody td, thead th, tfoot td{ padding-left:12px; padding-right:12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Cash Up Calculator</h1>
+        <p class="sub">Enter the count for each denomination — totals update instantly.</p>
+      </div>
+      <div class="chip" title="Auto-saves in this browser">
+        ✅ Auto-saves
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="toolbar">
+        <div class="dateRow">
+          <div class="field">
+            <span>Cash-up date</span>
+            <input id="cashDate" type="date" />
+          </div>
+          <div class="field">
+            <span class="hint">Tip: press <span class="kbd">Tab</span> to fly through inputs</span>
+          </div>
+        </div>
+        <div class="btns">
+          <button class="primary" id="fillZero" type="button">↺ Set blanks to 0</button>
+          <button class="danger" id="clearAll" type="button">🗑️ Clear all</button>
+        </div>
+      </div>
+
+      <div style="overflow:auto;">
+        <table aria-label="Cash calculator table">
+          <thead>
+            <tr>
+              <th style="min-width:190px;">Denomination</th>
+              <th style="width:170px;">Count</th>
+              <th style="width:220px; text-align:right;">Line total</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3">
+                <div class="totalRow">
+                  <div>
+                    <div class="hint">Grand total</div>
+                    <div class="grand" id="grandTotal">$0.00</div>
+                  </div>
+                  <div class="hint" id="itemsSummary">0 items entered</div>
+                </div>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <div class="footer">
+      <div>Currency: <strong>NZD</strong> (editable in code if you want other denominations).</div>
+      <div>Line totals are <strong>count × denomination</strong>.</div>
+    </div>
+  </div>
+
+  <script>
+    // NZ denominations (notes + coins)
+    const DENOMS = [
+      { label: "$100", value: 100, kind: "Note" },
+      { label: "$50",  value: 50,  kind: "Note" },
+      { label: "$20",  value: 20,  kind: "Note" },
+      { label: "$10",  value: 10,  kind: "Note" },
+      { label: "$5",   value: 5,   kind: "Note" },
+
+      { label: "$2",   value: 2,   kind: "Coin" },
+      { label: "$1",   value: 1,   kind: "Coin" },
+      { label: "50c",  value: 0.50,kind: "Coin" },
+      { label: "20c",  value: 0.20,kind: "Coin" },
+      { label: "10c",  value: 0.10,kind: "Coin" },
+    ];
+
+    const storageKey = "cashup_counts_v1";
+    const rowsEl = document.getElementById("rows");
+    const grandTotalEl = document.getElementById("grandTotal");
+    const itemsSummaryEl = document.getElementById("itemsSummary");
+    const cashDateEl = document.getElementById("cashDate");
+
+    const fmt = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
+
+    function loadState(){
+      try{
+        return JSON.parse(localStorage.getItem(storageKey) || "{}");
+      }catch{
+        return {};
+      }
+    }
+
+    function saveState(state){
+      localStorage.setItem(storageKey, JSON.stringify(state));
+    }
+
+    const state = loadState();
+
+    // Default date to today if empty
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth()+1).padStart(2,"0");
+    const dd = String(today.getDate()).padStart(2,"0");
+    cashDateEl.value = state.cashDate || `${yyyy}-${mm}-${dd}`;
+
+    cashDateEl.addEventListener("change", () => {
+      state.cashDate = cashDateEl.value;
+      saveState(state);
+    });
+
+    function buildRows(){
+      rowsEl.innerHTML = "";
+
+      DENOMS.forEach((d, idx) => {
+        const tr = document.createElement("tr");
+
+        const tdDenom = document.createElement("td");
+        tdDenom.innerHTML = `<span class="denom">${d.label}</span><span class="type">${d.kind}</span>`;
+
+        const tdCount = document.createElement("td");
+        const input = document.createElement("input");
+        input.className = "countInput";
+        input.type = "number";
+        input.inputMode = "numeric";
+        input.min = "0";
+        input.step = "1";
+        input.placeholder = "0";
+        input.autocomplete = "off";
+        input.setAttribute("aria-label", `Count for ${d.label}`);
+        input.value = (state.counts && state.counts[idx] !== undefined) ? state.counts[idx] : "";
+
+        // Stop mouse wheel changing values accidentally
+        input.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
+
+        input.addEventListener("input", () => {
+          if(!state.counts) state.counts = {};
+          const v = input.value === "" ? "" : Math.max(0, Math.floor(Number(input.value) || 0));
+          input.value = v === "" ? "" : String(v);
+          state.counts[idx] = input.value === "" ? "" : Number(input.value);
+          saveState(state);
+          recalc();
+        });
+
+        tdCount.appendChild(input);
+
+        const tdLine = document.createElement("td");
+        tdLine.className = "money";
+        tdLine.id = `line-${idx}`;
+        tdLine.textContent = fmt.format(0);
+
+        tr.appendChild(tdDenom);
+        tr.appendChild(tdCount);
+        tr.appendChild(tdLine);
+
+        rowsEl.appendChild(tr);
+      });
+    }
+
+    function recalc(){
+      let total = 0;
+      let items = 0;
+
+      DENOMS.forEach((d, idx) => {
+        const count = (state.counts && state.counts[idx] !== undefined && state.counts[idx] !== "")
+          ? Number(state.counts[idx]) : 0;
+
+        if (count > 0) items += count;
+
+        const line = count * d.value;
+        total += line;
+
+        const lineEl = document.getElementById(`line-${idx}`);
+        if (lineEl) lineEl.textContent = fmt.format(line);
+      });
+
+      grandTotalEl.textContent = fmt.format(total);
+
+      itemsSummaryEl.textContent =
+        items === 0 ? "0 items entered"
+        : items === 1 ? "1 item entered"
+        : `${items.toLocaleString("en-NZ")} items entered`;
+    }
+
+    document.getElementById("clearAll").addEventListener("click", () => {
+      // Clear counts but keep date
+      state.counts = {};
+      saveState(state);
+
+      // Reset inputs
+      document.querySelectorAll(".countInput").forEach(i => i.value = "");
+      recalc();
+    });
+
+    document.getElementById("fillZero").addEventListener("click", () => {
+      if(!state.counts) state.counts = {};
+      document.querySelectorAll(".countInput").forEach((i, idx) => {
+        if(i.value === ""){
+          i.value = "0";
+          state.counts[idx] = 0;
+        }
+      });
+      saveState(state);
+      recalc();
+    });
+
+    buildRows();
+    recalc();
+  </script>
+</body>
+</html>
+
