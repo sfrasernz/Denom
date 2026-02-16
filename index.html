@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Cash Up Calculator</title>
   <style>
-    :root{
+    :root{  
       --bg:#0b1220;
       --text:#eaf0ff;
       --muted:#9fb0d1;
@@ -40,9 +40,6 @@
 
       --focus: rgba(110,168,255,.55);
       --focusGlow: rgba(110,168,255,.18);
-
-      /* JS sets this for keypad positioning */
-      --bbh: 0px;
     }
 
     *{box-sizing:border-box}
@@ -157,29 +154,29 @@
 
     /* Pulse on update */
     @keyframes pulseOk {
-      0%   { box-shadow: 0 0 0 0 rgba(250,204,21,.45); }
-      70%  { box-shadow: 0 0 0 9px rgba(250,204,21,0); }
+      0%   { box-shadow: 0 0 0 0 rgba(250,204,21,.5); }
+      70%  { box-shadow: 0 0 0 10px rgba(250,204,21,0); }
       100% { box-shadow: 0 0 0 0 rgba(250,204,21,0); }
     }
     @keyframes pulseBad {
-      0%   { box-shadow: 0 0 0 0 rgba(251,113,133,.45); }
-      70%  { box-shadow: 0 0 0 9px rgba(251,113,133,0); }
+      0%   { box-shadow: 0 0 0 0 rgba(251,113,133,.5); }
+      70%  { box-shadow: 0 0 0 10px rgba(251,113,133,0); }
       100% { box-shadow: 0 0 0 0 rgba(251,113,133,0); }
     }
     .banner.animate-ok { animation: pulseOk 0.7s ease-out; }
     .banner.animate-bad { animation: pulseBad 0.7s ease-out; }
 
-    /* Row flash animation (soft) */
+    /* Row flash animation */
     @keyframes rowFlashOk {
-      0% { background-color: rgba(250,204,21,.12); }
+      0% { background-color: rgba(250,204,21,.25); }
       100% { background-color: transparent; }
     }
     @keyframes rowFlashBad {
-      0% { background-color: rgba(251,113,133,.12); }
+      0% { background-color: rgba(251,113,133,.25); }
       100% { background-color: transparent; }
     }
-    tbody tr.flash-ok { animation: rowFlashOk 0.9s ease-out; }
-    tbody tr.flash-bad { animation: rowFlashBad 0.9s ease-out; }
+    tbody tr.flash-ok { animation: rowFlashOk 0.6s ease-out; }
+    tbody tr.flash-bad { animation: rowFlashBad 0.6s ease-out; }
 
     .card{
       border: 1px solid var(--line);
@@ -189,7 +186,7 @@
       background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
     }
 
-    /* Glassy toolbar */
+    /* Glassy toolbar for premium feel */
     .toolbar{
       display:flex; justify-content:space-between; align-items:center;
       padding:10px 12px;
@@ -259,17 +256,19 @@
       vertical-align:middle;
     }
     tbody tr:hover{ background: rgba(255,255,255,.025); }
-    tbody tr.active{
-      outline: 2px solid rgba(110,168,255,.40);
-      outline-offset: -2px;
-      background: rgba(110,168,255,.07);
-    }
 
     tbody tr.to-remove.ok{
       background: linear-gradient(90deg, var(--rowGlow), var(--rowGlow2));
     }
+    tbody tr.to-remove.ok:hover{
+      background: linear-gradient(90deg, rgba(250,204,21,.10), rgba(250,204,21,.06));
+    }
+
     tbody tr.to-remove.bad{
       background: linear-gradient(90deg, var(--rowRed), var(--rowRed2));
+    }
+    tbody tr.to-remove.bad:hover{
+      background: linear-gradient(90deg, rgba(251,113,133,.12), rgba(251,113,133,.07));
     }
 
     .denom{ font-weight:950; letter-spacing:-0.01em; }
@@ -287,22 +286,11 @@
       text-align:right;
       transition: box-shadow .15s ease, border-color .15s ease, transform .12s ease;
     }
+    /* Micro-interaction: lift on focus */
     .countInput:focus{
       border-color: var(--focus);
       box-shadow: 0 0 0 4px var(--focusGlow);
       transform: translateY(-1px);
-    }
-
-    /* In keypad mode, inputs are display-only pills */
-    .keypadMode .countInput{
-      cursor: pointer;
-      user-select: none;
-      caret-color: transparent;
-    }
-    .keypadMode .countInput:focus{
-      box-shadow: none;
-      border-color: var(--line);
-      transform: none;
     }
 
     .money{
@@ -329,8 +317,8 @@
       color: #fff7cc;
     }
     .pill.bad{
-      background: rgba(251, 113, 133, .18);
-      border-color: rgba(251, 113, 133, .45);
+      background: var(--red);
+      border-color: var(--redBorder);
       color: #ffe1e8;
     }
 
@@ -425,7 +413,9 @@
       letter-spacing:-0.02em;
       font-variant-numeric: tabular-nums;
     }
-    .bottomRight{ text-align:right; }
+    .bottomRight{
+      text-align:right;
+    }
     .bottomRight .pillStatus{
       display:inline-flex;
       align-items:center;
@@ -457,94 +447,19 @@
       white-space:nowrap;
     }
 
-    /* Keypad dock (mobile only) */
-    .keypadDock{
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      bottom: calc(12px + var(--bbh) + 10px);
-      z-index: 45;
-      display: none;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.25);
-      box-shadow: 0 18px 50px rgba(0,0,0,.42);
-      backdrop-filter: blur(14px);
-      padding: 10px 12px;
-    }
-    .keypadHeader{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:8px;
-    }
-    .keypadTitle{
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-    .keypadActive{
-      font-weight: 950;
-      font-size: 14px;
-      color: var(--text);
-      font-variant-numeric: tabular-nums;
-      white-space:nowrap;
-    }
-    .keypadGrid{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:8px;
-    }
-    .kbtn{
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      padding: 12px 10px;
-      border-radius: 14px;
-      font-weight: 950;
-      font-size: 16px;
-      line-height: 1;
-      cursor: pointer;
-      user-select:none;
-      transition: transform .06s ease, background .2s ease, border-color .2s ease;
-    }
-    .kbtn:active{ transform: translateY(1px); }
-    .kbtn.alt{ color: var(--muted); }
-    .kbtn.actionOk{
-      border-color: rgba(250,204,21,.35);
-      background: rgba(250,204,21,.14);
-      color: #fff7cc;
-    }
-    .kbtn.actionBad{
-      border-color: rgba(251,113,133,.35);
-      background: rgba(251,113,133,.14);
-      color: #ffe1e8;
-    }
-    .kbtn.wide{
-      grid-column: span 3;
-      padding: 12px 10px;
-      font-size: 14px;
-    }
-
     /* Phone friendliness */
     @media (max-width:680px){
-      body{ padding-bottom: 260px; } /* room for keypad + bottom bar */
+      body{ padding-bottom: 96px; } /* room for bottom bar */
       .bottomBar{ display:block; }
-      .keypadDock{ display:block; }
     }
     @media (max-width:520px){
-      body{ padding:10px; padding-bottom: 270px; }
+      body{ padding:10px; padding-bottom: 100px; }
       thead th{ padding:9px 8px; font-size:10px; }
       tbody td{ padding:7px 8px; }
       .countInput{ width: 84px; padding:9px 9px; }
       .smallInput{ width: 92px; }
       .banner{ top: 8px; }
       .bottomBar{ left: 10px; right: 10px; bottom: 10px; }
-      .keypadDock{ left: 10px; right: 10px; }
-      .kbtn{ padding: 12px 8px; }
     }
 
     /* Respect reduced motion */
@@ -560,8 +475,8 @@
       <div>
         <h1>Cash Up Calculator</h1>
         <p class="sub">
-          Desktop: type in fields, <strong>Enter</strong> next (Shift+Enter back), <strong>↑/↓</strong> moves rows.
-          Phone: tap a row and use the keypad (no keyboard).
+          Enter counts. Press <strong>Enter</strong> to move forward (Shift+Enter goes back).
+          New session every time (no saving).
         </p>
       </div>
       <div class="chip">🧼 No saved sessions</div>
@@ -595,6 +510,7 @@
         </div>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <!-- ✅ ADDED: Print button -->
           <button id="printBtn" type="button">🧾 Print receipt</button>
           <button class="danger" id="clearAll" type="button">🗑️ Clear all</button>
         </div>
@@ -651,35 +567,6 @@
     </section>
   </div>
 
-  <!-- Mobile keypad -->
-  <div class="keypadDock" id="keypadDock" aria-live="polite">
-    <div class="keypadHeader">
-      <div>
-        <div class="keypadTitle">Keypad</div>
-        <div class="keypadActive" id="kpActive">Tap a row to start</div>
-      </div>
-      <div class="keypadActive mono" id="kpValue">—</div>
-    </div>
-
-    <div class="keypadGrid" id="kpGrid">
-      <button class="kbtn" data-k="1" type="button">1</button>
-      <button class="kbtn" data-k="2" type="button">2</button>
-      <button class="kbtn" data-k="3" type="button">3</button>
-      <button class="kbtn" data-k="4" type="button">4</button>
-      <button class="kbtn" data-k="5" type="button">5</button>
-      <button class="kbtn" data-k="6" type="button">6</button>
-      <button class="kbtn" data-k="7" type="button">7</button>
-      <button class="kbtn" data-k="8" type="button">8</button>
-      <button class="kbtn" data-k="9" type="button">9</button>
-
-      <button class="kbtn alt" data-k="C" type="button">C</button>
-      <button class="kbtn" data-k="0" type="button">0</button>
-      <button class="kbtn alt" data-k="BKSP" type="button">⌫</button>
-
-      <button class="kbtn actionOk wide" data-k="NEXT" type="button">Next ▸</button>
-    </div>
-  </div>
-
   <!-- Mobile sticky bottom bar -->
   <div class="bottomBar" id="bottomBar" aria-live="polite">
     <div class="bottomGrid">
@@ -725,15 +612,9 @@
     const removeBannerHintEl = document.getElementById("removeBannerHint");
 
     // Bottom bar
-    const bottomBarEl = document.getElementById("bottomBar");
     const bbTotalEl = document.getElementById("bbTotal");
     const bbStatusEl = document.getElementById("bbStatus");
     const bbBankingEl = document.getElementById("bbBanking");
-
-    // Keypad
-    const kpActiveEl = document.getElementById("kpActive");
-    const kpValueEl = document.getElementById("kpValue");
-    const kpGridEl = document.getElementById("kpGrid");
 
     const fmtNZD = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
     const moneyFromCents = (c) => fmtNZD.format((c || 0) / 100);
@@ -741,15 +622,11 @@
     // Slide-in only the first time the banner appears (per session)
     let bannerHasAppeared = false;
 
-    // Avoid spamming haptics/animations if plan didn't change
+    // Avoid spamming haptics/animations on every keystroke if the plan didn't change
     let lastPlanSignature = "";
 
     // For animated number transitions
     const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    // Keypad mode state
-    let keypadMode = false;
-    let activeIndex = 0;
 
     // New session each time: no storage. Date defaults to today.
     const today = new Date();
@@ -768,9 +645,13 @@
     }
 
     function animateMoneyEl(el, fromCents, toCents, durationMs = 140){
-      if (prefersReducedMotion) { el.textContent = moneyFromCents(toCents); return; }
+      if (prefersReducedMotion) {
+        el.textContent = moneyFromCents(toCents);
+        return;
+      }
       const start = performance.now();
       const delta = toCents - fromCents;
+
       const step = (t) => {
         const p = Math.min(1, (t - start) / durationMs);
         const eased = 1 - Math.pow(1 - p, 3);
@@ -787,9 +668,15 @@
       animateMoneyEl(el, fromCents, toCents);
     }
 
-    function measureBottomBar(){
-      const h = bottomBarEl ? bottomBarEl.getBoundingClientRect().height : 0;
-      document.documentElement.style.setProperty("--bbh", `${Math.round(h)}px`);
+    // ✅ ADDED: helper to move focus up/down the Count column
+    function focusCountAt(index){
+      const inputs = Array.from(document.querySelectorAll(".countInput"));
+      const clamped = Math.max(0, Math.min(inputs.length - 1, index));
+      const el = inputs[clamped];
+      if (el) {
+        el.focus();
+        el.select?.();
+      }
     }
 
     function buildRows(){
@@ -797,7 +684,6 @@
       DENOMS.forEach((d, idx) => {
         const tr = document.createElement("tr");
         tr.id = `row-${idx}`;
-        tr.dataset.idx = String(idx);
 
         const tdDenom = document.createElement("td");
         tdDenom.innerHTML = `<span class="denom">${d.label}</span>`;
@@ -813,48 +699,37 @@
         input.autocomplete = "off";
         input.setAttribute("aria-label", `Count for ${d.label}`);
 
-        // prevent scroll wheel changes
         input.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
 
-        // Desktop keys:
-        // - Enter: next (Shift+Enter back)
-        // - ArrowUp/ArrowDown: move up/down the column (STOP number increment/decrement)
         input.addEventListener("keydown", (e) => {
-          if (keypadMode) return;
-
           const inputs = Array.from(document.querySelectorAll(".countInput"));
           const i = inputs.indexOf(input);
+
+          // ✅ ADDED: stop arrow keys changing the number; use them for navigation
+          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            e.preventDefault();
+            focusCountAt(e.key === "ArrowDown" ? i + 1 : i - 1);
+            return;
+          }
+          // Some browsers can increment on PageUp/PageDown too
+          if (e.key === "PageDown" || e.key === "PageUp") {
+            e.preventDefault();
+            focusCountAt(e.key === "PageDown" ? i + 1 : i - 1);
+            return;
+          }
 
           if (e.key === "Enter") {
             e.preventDefault();
             const nextIndex = e.shiftKey ? i - 1 : i + 1;
-            const target = inputs[Math.max(0, Math.min(inputs.length - 1, nextIndex))];
-            target.focus();
-            target.select?.();
-            return;
-          }
-
-          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-            e.preventDefault(); // <- this stops the numeric input increment/decrement
-            const nextIndex = e.key === "ArrowDown" ? i + 1 : i - 1;
-            const target = inputs[Math.max(0, Math.min(inputs.length - 1, nextIndex))];
-            target.focus();
-            target.select?.();
+            focusCountAt(nextIndex);
             return;
           }
         });
 
         input.addEventListener("input", () => {
-          if (keypadMode) return;
           const v = input.value === "" ? "" : Math.max(0, Math.floor(Number(input.value) || 0));
           input.value = v === "" ? "" : String(v);
           recalc();
-        });
-
-        // Mobile: tapping input selects row (avoid keyboard)
-        input.addEventListener("focus", () => {
-          if (!keypadMode) return;
-          input.blur();
         });
 
         tdCount.appendChild(input);
@@ -880,36 +755,13 @@
         tr.appendChild(tdRemoveQty);
         tr.appendChild(tdRemoveAmt);
 
-        // Mobile: tap row to select active denom
-        tr.addEventListener("click", () => {
-          if (!keypadMode) return;
-          setActiveIndex(idx, true);
-        });
-
         rowsEl.appendChild(tr);
       });
     }
 
-    function getInputs(){ return Array.from(document.querySelectorAll(".countInput")); }
-
     function getCounts(){
-      const inputs = getInputs();
+      const inputs = Array.from(document.querySelectorAll(".countInput"));
       return inputs.map(i => i.value === "" ? 0 : (Number(i.value) || 0));
-    }
-
-    function setCountAt(idx, val){
-      const inputs = getInputs();
-      const input = inputs[idx];
-      if (!input) return;
-      const v = Math.max(0, Math.floor(Number(val) || 0));
-      input.value = String(v);
-    }
-
-    function getCountAt(idx){
-      const inputs = getInputs();
-      const input = inputs[idx];
-      if (!input) return 0;
-      return input.value === "" ? 0 : (Number(input.value) || 0);
     }
 
     function computeTotals(counts){
@@ -1017,7 +869,6 @@
       let remainingToRemove = needToRemove;
       const plan = [];
 
-      // Greedy: biggest denominations first
       for (let i = 0; i < DENOMS.length; i++){
         const denom = DENOMS[i];
         const available = counts[i] || 0;
@@ -1052,7 +903,10 @@
 
         if (qtyEl) qtyEl.innerHTML = `<span class="pill ${isExact ? "" : "bad"}">${p.count}</span>`;
         if (amtEl) amtEl.textContent = moneyFromCents(lineCents);
-        if (rowEl) rowEl.classList.add("to-remove", mode);
+
+        if (rowEl){
+          rowEl.classList.add("to-remove", mode);
+        }
       });
 
       if (!bannerParts.length){
@@ -1108,94 +962,18 @@
 
     function updateBottomBar(totalCents, targetCents, mode){
       setMoneyAnimated(bbTotalEl, totalCents);
+
       const bankingCents = totalCents - targetCents;
       bbBankingEl.textContent = `Banking: ${moneyFromCents(bankingCents)}`;
 
       bbStatusEl.classList.remove("ok","bad");
-      if (mode === "ok") { bbStatusEl.classList.add("ok"); bbStatusEl.textContent = "OK"; }
-      else { bbStatusEl.classList.add("bad"); bbStatusEl.textContent = "Issue"; }
-    }
-
-    function setActiveIndex(idx, scrollIntoView){
-      activeIndex = Math.max(0, Math.min(DENOMS.length - 1, idx));
-      DENOMS.forEach((_, i) => {
-        const row = document.getElementById(`row-${i}`);
-        if (row) row.classList.toggle("active", i === activeIndex);
-      });
-      kpActiveEl.textContent = `Denom: ${DENOMS[activeIndex].label}`;
-      kpValueEl.textContent = `Count: ${getCountAt(activeIndex)}`;
-      if (scrollIntoView) {
-        const row = document.getElementById(`row-${activeIndex}`);
-        row?.scrollIntoView({ block: "center", behavior: prefersReducedMotion ? "auto" : "smooth" });
+      if (mode === "ok") {
+        bbStatusEl.classList.add("ok");
+        bbStatusEl.textContent = "OK";
+      } else {
+        bbStatusEl.classList.add("bad");
+        bbStatusEl.textContent = "Issue";
       }
-    }
-
-    function keypadApplyKey(k){
-      if (!keypadMode) return;
-
-      const current = String(getCountAt(activeIndex));
-      if (k >= "0" && k <= "9") {
-        const appended = (current === "0") ? k : (current + k);
-        const nextStr = appended.slice(0, 4);
-        setCountAt(activeIndex, nextStr);
-        kpValueEl.textContent = `Count: ${getCountAt(activeIndex)}`;
-        haptic("ok");
-        recalc();
-        return;
-      }
-      if (k === "BKSP") {
-        const nextStr = current.length <= 1 ? "0" : current.slice(0, -1);
-        setCountAt(activeIndex, nextStr);
-        kpValueEl.textContent = `Count: ${getCountAt(activeIndex)}`;
-        haptic("ok");
-        recalc();
-        return;
-      }
-      if (k === "C") {
-        setCountAt(activeIndex, 0);
-        kpValueEl.textContent = `Count: 0`;
-        haptic("ok");
-        recalc();
-        return;
-      }
-      if (k === "NEXT") {
-        setActiveIndex(activeIndex + 1, true);
-        haptic("ok");
-        return;
-      }
-    }
-
-    function setKeypadMode(on){
-      keypadMode = !!on;
-      document.body.classList.toggle("keypadMode", keypadMode);
-
-      const inputs = getInputs();
-      inputs.forEach((inp, idx) => {
-        if (keypadMode) {
-          inp.setAttribute("readonly", "readonly");
-          inp.setAttribute("inputmode", "none");
-          inp.addEventListener("click", (e) => {
-            e.preventDefault();
-            setActiveIndex(idx, true);
-          }, { passive: false });
-        } else {
-          inp.removeAttribute("readonly");
-          inp.setAttribute("inputmode", "numeric");
-        }
-      });
-
-      if (keypadMode) setActiveIndex(activeIndex, false);
-      else {
-        DENOMS.forEach((_, i) => document.getElementById(`row-${i}`)?.classList.remove("active"));
-        kpActiveEl.textContent = "Tap a row to start";
-        kpValueEl.textContent = "—";
-      }
-    }
-
-    function detectKeypadMode(){
-      const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
-      const narrow = window.innerWidth < 680;
-      return coarse || narrow;
     }
 
     function recalc(){
@@ -1217,16 +995,6 @@
 
       setMoneyAnimated(remainingBadgeEl, plan.remainingCents);
       updateBottomBar(totalCents, targetCents, plan.mode || (plan.ok ? "ok" : "bad"));
-
-      // keypad display
-      if (keypadMode) {
-        kpValueEl.textContent = `Count: ${getCountAt(activeIndex)}`;
-        const nextBtn = kpGridEl.querySelector('[data-k="NEXT"]');
-        if (nextBtn) {
-          nextBtn.classList.remove("actionOk","actionBad");
-          nextBtn.classList.add(plan.mode === "bad" ? "actionBad" : "actionOk");
-        }
-      }
 
       removePlanEl.innerHTML = "";
       if (plan.plan.length > 0) {
@@ -1273,17 +1041,27 @@
       }
     }
 
-    // ---------- Receipt print ----------
+    document.getElementById("clearAll").addEventListener("click", () => {
+      document.querySelectorAll(".countInput").forEach(i => i.value = "");
+      recalc();
+      haptic("ok");
+    });
+
+    floatTargetEl.addEventListener("input", () => {
+      const v = Math.max(0, Math.floor(Number(floatTargetEl.value || 0)));
+      floatTargetEl.value = String(v);
+      recalc();
+    });
+
+    // ✅ ADDED: Receipt printing (58mm-style text layout)
     function padRight(s, n){ s = String(s); return s.length >= n ? s.slice(0,n) : s + " ".repeat(n - s.length); }
     function padLeft(s, n){ s = String(s); return s.length >= n ? s.slice(-n) : " ".repeat(n - s.length) + s; }
 
-    function moneyNoNZD(cents){
-      // receipt-friendly: $12.30 (no NZD suffix)
+    function moneyReceipt(cents){
       const sign = cents < 0 ? "-" : "";
       const abs = Math.abs(cents);
       const dollars = Math.floor(abs / 100);
       const c = abs % 100;
-      // add commas
       const dStr = dollars.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       return `${sign}$${dStr}.${String(c).padStart(2,"0")}`;
     }
@@ -1296,23 +1074,20 @@
       const targetCents = targetDollars * 100;
 
       const plan = computeRemovalPlan(counts, totalCents, targetCents);
-
       const bankingCents = totalCents - targetCents;
 
-      // 58mm printers are often ~32 chars wide in a small monospace font
-      const W = 32;
-
+      const W = 32; // typical 58mm width in chars
       const lines = [];
+
       const date = cashDateEl.value || "";
       lines.push(padRight("CASH UP SUMMARY", W));
       lines.push(padRight(date, W));
       lines.push("-".repeat(W));
-      lines.push(padRight("COUNTED", 20) + padLeft(moneyNoNZD(totalCents), 12));
-      lines.push(padRight("FLOAT TARGET", 20) + padLeft(moneyNoNZD(targetCents), 12));
-      lines.push(padRight("BANKING", 20) + padLeft(moneyNoNZD(bankingCents), 12));
+      lines.push(padRight("COUNTED", 20) + padLeft(moneyReceipt(totalCents), 12));
+      lines.push(padRight("FLOAT TARGET", 20) + padLeft(moneyReceipt(targetCents), 12));
+      lines.push(padRight("BANKING", 20) + padLeft(moneyReceipt(bankingCents), 12));
       lines.push("-".repeat(W));
 
-      // Breakdown of entered denominations
       lines.push(padRight("DENOM  QTY        AMT", W));
       let any = false;
       DENOMS.forEach((d, i) => {
@@ -1321,7 +1096,7 @@
         any = true;
         const amt = q * d.cents;
         const left = padRight(d.label, 6) + padLeft(q, 5) + " ";
-        lines.push(padRight(left, 20) + padLeft(moneyNoNZD(amt), 12));
+        lines.push(padRight(left, 20) + padLeft(moneyReceipt(amt), 12));
       });
       if (!any) lines.push(padRight("(no entries)", W));
 
@@ -1333,14 +1108,12 @@
         plan.plan.forEach(p => {
           const amt = p.count * p.centsEach;
           const left = padRight(p.label, 6) + padLeft(p.count, 5) + " ";
-          lines.push(padRight(left, 20) + padLeft(moneyNoNZD(amt), 12));
+          lines.push(padRight(left, 20) + padLeft(moneyReceipt(amt), 12));
         });
       }
       lines.push("-".repeat(W));
-      lines.push(padRight("REMAINING IN TILL", 20) + padLeft(moneyNoNZD(plan.remainingCents), 12));
-      if (!plan.ok) {
-        lines.push(padRight("** ISSUE: NOT EXACT **", W));
-      }
+      lines.push(padRight("REMAINING IN TILL", 20) + padLeft(moneyReceipt(plan.remainingCents), 12));
+      if (!plan.ok) lines.push(padRight("** ISSUE: NOT EXACT **", W));
       lines.push("");
       lines.push(padRight("Signature: ____________", W));
       lines.push("");
@@ -1350,8 +1123,6 @@
 
     function printReceipt(){
       const text = buildReceiptText();
-
-      // Open a small print window with receipt formatting
       const w = window.open("", "_blank", "width=420,height=650");
       if (!w) {
         alert("Pop-up blocked. Please allow pop-ups for printing.");
@@ -1366,7 +1137,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Print</title>
   <style>
-    /* Receipt printer-friendly */
     @page { size: 58mm auto; margin: 0; }
     html, body { margin:0; padding:0; background:#fff; color:#000; }
     pre {
@@ -1376,13 +1146,11 @@
       white-space: pre;
       padding: 6mm 3mm;
     }
-    @media print {
-      pre { padding: 0; }
-    }
+    @media print { pre { padding: 0; } }
   </style>
 </head>
 <body>
-  <pre>${text.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre>
+  <pre>${text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre>
   <script>
     window.onload = () => { window.print(); };
     window.onafterprint = () => { window.close(); };
@@ -1391,66 +1159,21 @@
 </html>`);
       w.document.close();
     }
-    // ---------- end print ----------
 
-    document.getElementById("clearAll").addEventListener("click", () => {
-      getInputs().forEach(i => i.value = "");
-      recalc();
-      haptic("ok");
-      if (keypadMode) setActiveIndex(0, false);
-    });
-
+    // ✅ ADDED: wire up print button
     document.getElementById("printBtn").addEventListener("click", () => {
       printReceipt();
     });
 
-    floatTargetEl.addEventListener("input", () => {
-      const v = Math.max(0, Math.floor(Number(floatTargetEl.value || 0)));
-      floatTargetEl.value = String(v);
-      recalc();
-    });
-
-    // Keypad buttons
-    kpGridEl.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-k]");
-      if (!btn) return;
-      keypadApplyKey(btn.dataset.k);
-    });
-
-    // Build UI
     buildRows();
-
-    // Enable keypad mode as appropriate
-    setKeypadMode(detectKeypadMode());
-    measureBottomBar();
     recalc();
 
-    // Auto-focus first denomination on desktop load
     window.addEventListener("load", () => {
-      measureBottomBar();
-      const shouldUseKeypad = detectKeypadMode();
-      setKeypadMode(shouldUseKeypad);
-
-      if (!shouldUseKeypad) {
-        const firstInput = document.querySelector(".countInput");
-        if (firstInput) {
-          firstInput.focus();
-          firstInput.select();
-        }
-      } else {
-        setActiveIndex(0, false);
+      const firstInput = document.querySelector(".countInput");
+      if (firstInput) {
+        firstInput.focus();
+        firstInput.select();
       }
-    });
-
-    // Keep mode + layout in sync on resize/orientation changes
-    let resizeT;
-    window.addEventListener("resize", () => {
-      clearTimeout(resizeT);
-      resizeT = setTimeout(() => {
-        const shouldUseKeypad = detectKeypadMode();
-        if (shouldUseKeypad !== keypadMode) setKeypadMode(shouldUseKeypad);
-        measureBottomBar();
-      }, 120);
     });
   </script>
 </body>
