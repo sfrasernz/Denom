@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Cash Up Calculator</title>
   <style>
-    :root{  
+    :root{
       --bg:#0b1220;
       --text:#eaf0ff;
       --muted:#9fb0d1;
@@ -510,8 +510,6 @@
         </div>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <!-- ✅ ADDED: Print button -->
-          <button id="printBtn" type="button">🧾 Print receipt</button>
           <button class="danger" id="clearAll" type="button">🗑️ Clear all</button>
         </div>
       </div>
@@ -638,7 +636,12 @@
       try { navigator.vibrate(pattern); } catch {}
     }
 
+    function formatCentsCompact(cents){
+      return moneyFromCents(cents);
+    }
+
     function parseMoneyTextToCents(text){
+      // expects $1,234.56 (NZD) – used for animated transitions fallback
       const cleaned = String(text).replace(/[^0-9.-]/g, "");
       const val = Number(cleaned || 0);
       return Math.round(val * 100);
@@ -654,6 +657,7 @@
 
       const step = (t) => {
         const p = Math.min(1, (t - start) / durationMs);
+        // easeOutCubic
         const eased = 1 - Math.pow(1 - p, 3);
         const current = Math.round(fromCents + delta * eased);
         el.textContent = moneyFromCents(current);
@@ -666,17 +670,6 @@
       const fromCents = parseMoneyTextToCents(el.textContent);
       if (fromCents === toCents) return;
       animateMoneyEl(el, fromCents, toCents);
-    }
-
-    // ✅ ADDED: helper to move focus up/down the Count column
-    function focusCountAt(index){
-      const inputs = Array.from(document.querySelectorAll(".countInput"));
-      const clamped = Math.max(0, Math.min(inputs.length - 1, index));
-      const el = inputs[clamped];
-      if (el) {
-        el.focus();
-        el.select?.();
-      }
     }
 
     function buildRows(){
@@ -702,27 +695,14 @@
         input.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
 
         input.addEventListener("keydown", (e) => {
-          const inputs = Array.from(document.querySelectorAll(".countInput"));
-          const i = inputs.indexOf(input);
-
-          // ✅ ADDED: stop arrow keys changing the number; use them for navigation
-          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-            e.preventDefault();
-            focusCountAt(e.key === "ArrowDown" ? i + 1 : i - 1);
-            return;
-          }
-          // Some browsers can increment on PageUp/PageDown too
-          if (e.key === "PageDown" || e.key === "PageUp") {
-            e.preventDefault();
-            focusCountAt(e.key === "PageDown" ? i + 1 : i - 1);
-            return;
-          }
-
           if (e.key === "Enter") {
             e.preventDefault();
+            const inputs = Array.from(document.querySelectorAll(".countInput"));
+            const i = inputs.indexOf(input);
             const nextIndex = e.shiftKey ? i - 1 : i + 1;
-            focusCountAt(nextIndex);
-            return;
+            const target = inputs[Math.max(0, Math.min(inputs.length - 1, nextIndex))];
+            target.focus();
+            target.select?.();
           }
         });
 
@@ -813,6 +793,7 @@
       removeBannerAmtEl.textContent = moneyFromCents(amtCents);
       removeBannerHintEl.textContent = hint || "Use the highlighted rows below as your pick list.";
 
+      // Slide-in only on first appearance (per session)
       if (!bannerHasAppeared && wasHidden) {
         bannerHasAppeared = true;
         removeBannerEl.classList.remove("slide-in");
@@ -869,6 +850,7 @@
       let remainingToRemove = needToRemove;
       const plan = [];
 
+      // Greedy: biggest denominations first, limited by available counts.
       for (let i = 0; i < DENOMS.length; i++){
         const denom = DENOMS[i];
         const available = counts[i] || 0;
@@ -895,6 +877,7 @@
       const bannerText = bannerParts.length ? bannerParts.join(" · ") : "—";
       const planSig = `${mode}|need:${needToRemove}|removed:${removedCents}|left:${remainingToRemove}|${bannerText}`;
 
+      // Populate remove columns ONLY for >0, highlight row
       plan.forEach(p => {
         const qtyEl = document.getElementById(`removeQty-${p.idx}`);
         const amtEl = document.getElementById(`removeAmt-${p.idx}`);
@@ -961,10 +944,13 @@
     }
 
     function updateBottomBar(totalCents, targetCents, mode){
+      // total
       setMoneyAnimated(bbTotalEl, totalCents);
 
+      // banking = total - target (can be negative)
       const bankingCents = totalCents - targetCents;
-      bbBankingEl.textContent = `Banking: ${moneyFromCents(bankingCents)}`;
+      const bankingText = `Banking: ${moneyFromCents(bankingCents)}`;
+      bbBankingEl.textContent = bankingText;
 
       bbStatusEl.classList.remove("ok","bad");
       if (mode === "ok") {
@@ -980,6 +966,7 @@
       const counts = getCounts();
       const { totalCents, items } = computeTotals(counts);
 
+      // Animated grand total + remaining
       setMoneyAnimated(grandTotalEl, totalCents);
 
       itemsSummaryEl.textContent =
@@ -993,7 +980,10 @@
 
       const plan = computeRemovalPlan(counts, totalCents, targetCents);
 
+      // animated remaining badge
       setMoneyAnimated(remainingBadgeEl, plan.remainingCents);
+
+      // bottom bar
       updateBottomBar(totalCents, targetCents, plan.mode || (plan.ok ? "ok" : "bad"));
 
       removePlanEl.innerHTML = "";
@@ -1023,6 +1013,7 @@
       floatStatusEl.textContent = plan.ok ? "OK" : "Issue";
       removeSummaryEl.textContent = plan.message;
 
+      // Animate + haptic only when plan changes
       if (plan.planSig && plan.planSig !== lastPlanSignature) {
         lastPlanSignature = plan.planSig;
 
@@ -1044,6 +1035,7 @@
     document.getElementById("clearAll").addEventListener("click", () => {
       document.querySelectorAll(".countInput").forEach(i => i.value = "");
       recalc();
+      // Small haptic to confirm clear (if supported)
       haptic("ok");
     });
 
@@ -1053,121 +1045,10 @@
       recalc();
     });
 
-    // ✅ ADDED: Receipt printing (58mm-style text layout)
-    function padRight(s, n){ s = String(s); return s.length >= n ? s.slice(0,n) : s + " ".repeat(n - s.length); }
-    function padLeft(s, n){ s = String(s); return s.length >= n ? s.slice(-n) : " ".repeat(n - s.length) + s; }
-
-    function moneyReceipt(cents){
-      const sign = cents < 0 ? "-" : "";
-      const abs = Math.abs(cents);
-      const dollars = Math.floor(abs / 100);
-      const c = abs % 100;
-      const dStr = dollars.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      return `${sign}$${dStr}.${String(c).padStart(2,"0")}`;
-    }
-
-    function buildReceiptText(){
-      const counts = getCounts();
-      const { totalCents } = computeTotals(counts);
-
-      const targetDollars = Math.max(0, Math.floor(Number(floatTargetEl.value || 0)));
-      const targetCents = targetDollars * 100;
-
-      const plan = computeRemovalPlan(counts, totalCents, targetCents);
-      const bankingCents = totalCents - targetCents;
-
-      const W = 32; // typical 58mm width in chars
-      const lines = [];
-
-      const date = cashDateEl.value || "";
-      lines.push(padRight("CASH UP SUMMARY", W));
-      lines.push(padRight(date, W));
-      lines.push("-".repeat(W));
-      lines.push(padRight("COUNTED", 20) + padLeft(moneyReceipt(totalCents), 12));
-      lines.push(padRight("FLOAT TARGET", 20) + padLeft(moneyReceipt(targetCents), 12));
-      lines.push(padRight("BANKING", 20) + padLeft(moneyReceipt(bankingCents), 12));
-      lines.push("-".repeat(W));
-
-      lines.push(padRight("DENOM  QTY        AMT", W));
-      let any = false;
-      DENOMS.forEach((d, i) => {
-        const q = counts[i] || 0;
-        if (!q) return;
-        any = true;
-        const amt = q * d.cents;
-        const left = padRight(d.label, 6) + padLeft(q, 5) + " ";
-        lines.push(padRight(left, 20) + padLeft(moneyReceipt(amt), 12));
-      });
-      if (!any) lines.push(padRight("(no entries)", W));
-
-      lines.push("-".repeat(W));
-      lines.push(padRight("REMOVE TO LEAVE FLOAT", W));
-      if (plan.plan.length === 0) {
-        lines.push(padRight("(nothing to remove)", W));
-      } else {
-        plan.plan.forEach(p => {
-          const amt = p.count * p.centsEach;
-          const left = padRight(p.label, 6) + padLeft(p.count, 5) + " ";
-          lines.push(padRight(left, 20) + padLeft(moneyReceipt(amt), 12));
-        });
-      }
-      lines.push("-".repeat(W));
-      lines.push(padRight("REMAINING IN TILL", 20) + padLeft(moneyReceipt(plan.remainingCents), 12));
-      if (!plan.ok) lines.push(padRight("** ISSUE: NOT EXACT **", W));
-      lines.push("");
-      lines.push(padRight("Signature: ____________", W));
-      lines.push("");
-      lines.push("");
-      return lines.join("\n");
-    }
-
-    function printReceipt(){
-      const text = buildReceiptText();
-      const w = window.open("", "_blank", "width=420,height=650");
-      if (!w) {
-        alert("Pop-up blocked. Please allow pop-ups for printing.");
-        return;
-      }
-      w.document.open();
-      w.document.write(`
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Print</title>
-  <style>
-    @page { size: 58mm auto; margin: 0; }
-    html, body { margin:0; padding:0; background:#fff; color:#000; }
-    pre {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 11px;
-      line-height: 1.25;
-      white-space: pre;
-      padding: 6mm 3mm;
-    }
-    @media print { pre { padding: 0; } }
-  </style>
-</head>
-<body>
-  <pre>${text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre>
-  <script>
-    window.onload = () => { window.print(); };
-    window.onafterprint = () => { window.close(); };
-  </script>
-</body>
-</html>`);
-      w.document.close();
-    }
-
-    // ✅ ADDED: wire up print button
-    document.getElementById("printBtn").addEventListener("click", () => {
-      printReceipt();
-    });
-
     buildRows();
     recalc();
 
+    // Auto-focus first denomination on load
     window.addEventListener("load", () => {
       const firstInput = document.querySelector(".countInput");
       if (firstInput) {
