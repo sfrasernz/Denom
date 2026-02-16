@@ -447,6 +447,35 @@
       white-space:nowrap;
     }
 
+    /* Receipt print styling */
+    #receiptPrint{
+      display:none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      color:#000;
+    }
+
+    @media print{
+      body::before{ display:none !important; }
+      .wrap, header, .card, .bottomBar, .banner{ display:none !important; }
+      body{
+        background:#fff !important;
+        padding:0 !important;
+        margin:0 !important;
+      }
+      #receiptPrint{
+        display:block !important;
+        padding: 6mm 4mm;
+        width: 72mm; /* good for 80mm paper; change to ~48mm for 58mm printers */
+      }
+      #receiptPrint .center{ text-align:center; }
+      #receiptPrint .muted{ color:#333; }
+      #receiptPrint .hr{ border-top:1px dashed #000; margin:6px 0; }
+      #receiptPrint .row{
+        display:flex; justify-content:space-between; gap:10px;
+      }
+      #receiptPrint .row span:last-child{ white-space:nowrap; }
+    }
+
     /* Phone friendliness */
     @media (max-width:680px){
       body{ padding-bottom: 96px; } /* room for bottom bar */
@@ -510,6 +539,7 @@
         </div>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button id="printReceipt" type="button">🧾 Print</button>
           <button class="danger" id="clearAll" type="button">🗑️ Clear all</button>
         </div>
       </div>
@@ -579,6 +609,9 @@
     </div>
   </div>
 
+  <!-- Hidden receipt content for printing -->
+  <div id="receiptPrint" aria-hidden="true"></div>
+
   <script>
     const DENOMS = [
       { label: "$100", cents: 10000 },
@@ -614,6 +647,10 @@
     const bbStatusEl = document.getElementById("bbStatus");
     const bbBankingEl = document.getElementById("bbBanking");
 
+    // Print
+    const printBtn = document.getElementById("printReceipt");
+    const receiptEl = document.getElementById("receiptPrint");
+
     const fmtNZD = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
     const moneyFromCents = (c) => fmtNZD.format((c || 0) / 100);
 
@@ -636,12 +673,7 @@
       try { navigator.vibrate(pattern); } catch {}
     }
 
-    function formatCentsCompact(cents){
-      return moneyFromCents(cents);
-    }
-
     function parseMoneyTextToCents(text){
-      // expects $1,234.56 (NZD) – used for animated transitions fallback
       const cleaned = String(text).replace(/[^0-9.-]/g, "");
       const val = Number(cleaned || 0);
       return Math.round(val * 100);
@@ -657,8 +689,7 @@
 
       const step = (t) => {
         const p = Math.min(1, (t - start) / durationMs);
-        // easeOutCubic
-        const eased = 1 - Math.pow(1 - p, 3);
+        const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
         const current = Math.round(fromCents + delta * eased);
         el.textContent = moneyFromCents(current);
         if (p < 1) requestAnimationFrame(step);
@@ -694,15 +725,27 @@
 
         input.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
 
+        // Enter + Arrow navigation (override arrow increment)
         input.addEventListener("keydown", (e) => {
+          const inputs = Array.from(document.querySelectorAll(".countInput"));
+          const i = inputs.indexOf(input);
+
           if (e.key === "Enter") {
             e.preventDefault();
-            const inputs = Array.from(document.querySelectorAll(".countInput"));
-            const i = inputs.indexOf(input);
             const nextIndex = e.shiftKey ? i - 1 : i + 1;
             const target = inputs[Math.max(0, Math.min(inputs.length - 1, nextIndex))];
             target.focus();
             target.select?.();
+            return;
+          }
+
+          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            e.preventDefault();
+            const nextIndex = (e.key === "ArrowDown") ? i + 1 : i - 1;
+            const target = inputs[Math.max(0, Math.min(inputs.length - 1, nextIndex))];
+            target.focus();
+            target.select?.();
+            return;
           }
         });
 
@@ -962,6 +1005,105 @@
       }
     }
 
+    // -------- Receipt printing helpers --------
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, (c) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[c]));
+    }
+
+    function buildReceiptHTML({ counts, totalCents, targetCents, plan }){
+      const dateText = cashDateEl.value || "";
+      const removedCents = plan?.removedCents ?? 0;
+      const remainingCents = plan?.remainingCents ?? totalCents;
+      const bankingCents = totalCents - targetCents;
+
+      const lines = [];
+      DENOMS.forEach((d, idx) => {
+        const c = counts[idx] || 0;
+        if (c <= 0) return;
+        const line = c * d.cents;
+        lines.push(`
+          <div class="row">
+            <span>${escapeHtml(d.label)} × ${c}</span>
+            <span>${moneyFromCents(line)}</span>
+          </div>
+        `);
+      });
+
+      const removeLines = (plan?.plan || []).map(p => {
+        const line = p.count * p.centsEach;
+        return `
+          <div class="row">
+            <span>${escapeHtml(p.label)} × ${p.count}</span>
+            <span>-${moneyFromCents(line)}</span>
+          </div>
+        `;
+      }).join("");
+
+      const statusText = (plan?.ok) ? "OK" : "ISSUE";
+      const issueLine = (!plan?.ok && plan?.leftoverNeed > 0)
+        ? `<div class="muted">Still short to exact float: ${moneyFromCents(plan.leftoverNeed)}</div>`
+        : "";
+
+      return `
+        <div class="center">
+          <div style="font-weight:900; font-size:14px;">Cash Up Summary</div>
+          <div class="muted" style="font-size:12px;">${escapeHtml(dateText)}</div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div style="font-weight:900;">Counts</div>
+        ${lines.length ? lines.join("") : `<div class="muted">No items entered</div>`}
+
+        <div class="hr"></div>
+
+        <div class="row" style="font-weight:900;">
+          <span>Total</span><span>${moneyFromCents(totalCents)}</span>
+        </div>
+        <div class="row">
+          <span>Target float</span><span>${moneyFromCents(targetCents)}</span>
+        </div>
+        <div class="row">
+          <span>Banking (Total - Float)</span><span>${moneyFromCents(bankingCents)}</span>
+        </div>
+
+        <div class="hr"></div>
+
+        <div style="font-weight:900;">Remove (to leave float)</div>
+        ${removeLines || `<div class="muted">—</div>`}
+
+        <div class="row" style="font-weight:900; margin-top:4px;">
+          <span>Removed</span><span>${moneyFromCents(removedCents)}</span>
+        </div>
+        <div class="row" style="font-weight:900;">
+          <span>Remaining</span><span>${moneyFromCents(remainingCents)}</span>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="center" style="font-weight:900;">Status: ${statusText}</div>
+        ${issueLine}
+
+        <div style="height:10mm;"></div>
+      `;
+    }
+
+    function printReceipt(){
+      const counts = getCounts();
+      const { totalCents } = computeTotals(counts);
+      const targetDollars = Math.max(0, Math.floor(Number(floatTargetEl.value || 0)));
+      const targetCents = targetDollars * 100;
+      const plan = computeRemovalPlan(counts, totalCents, targetCents);
+
+      receiptEl.innerHTML = buildReceiptHTML({ counts, totalCents, targetCents, plan });
+      window.print();
+    }
+
+    printBtn.addEventListener("click", printReceipt);
+    // -----------------------------------------
+
     function recalc(){
       const counts = getCounts();
       const { totalCents, items } = computeTotals(counts);
@@ -1035,7 +1177,6 @@
     document.getElementById("clearAll").addEventListener("click", () => {
       document.querySelectorAll(".countInput").forEach(i => i.value = "");
       recalc();
-      // Small haptic to confirm clear (if supported)
       haptic("ok");
     });
 
